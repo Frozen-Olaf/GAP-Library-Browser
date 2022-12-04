@@ -41,7 +41,7 @@ To compile and run the browser, simply in command line:
   2. run the following command:
 > java -jar target/GAP_Library_Browser_v0.1.jar
         
-### Note:
+#### Note:
 This project CANNOT run with Java JDK < 8 (not incl. 8), 
 
 and it has not been tested on JDK < 11 yet.
@@ -53,11 +53,10 @@ The searches that can be performed in the browser generally consist of the follo
   2. search a number of GAP categories, returns the methods whose arguments ***altogether*** are under the specified categories.
   3. search GAP methods by a combination of method name and categories of arguments applicable to that method.
   
-### Note:
+#### Note:
 By "***altogether***" in type 2, I mean the union set of all categories of all the arguments of a method.
 
-
-### Search Method (Type 3)
+#### Search Method (Type 3)
 Now, more specifically on type 3, the search input should be of the following formats:
 
 If you only want to search for methods under certain categories and by certain method name pattern:
@@ -66,7 +65,7 @@ If you only want to search for methods under certain categories and by certain m
 If you would like to impose an order on the categories of arguments of the method for searching:
 > method_name([arg1_category1, ...], [arg2_category1, arg2_category2, arg2_category3], ...)
  
-#### Subset symbol '...'
+##### Subset symbol '...'
 As you may be wondering what the role of '...' is:
 
 If user enters '...' as (the ending) part of their input, then it specifies that the search results should be a superset of the user input. This is only applicable when user is searching categories or methods.
