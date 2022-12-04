@@ -56,7 +56,7 @@ The searches that can be performed in the browser generally consist of the follo
 #### Note:
 By "***altogether***" in type 2, I mean the union set of all categories of all the arguments of a method.
 
-#### Search Method (Type 3)
+### Search Method (Type 3)
 Now, more specifically on type 3, the search input should be of the following formats:
 
 If you only want to search for methods under certain categories and by certain method name pattern:
@@ -65,7 +65,7 @@ If you only want to search for methods under certain categories and by certain m
 If you would like to impose an order on the categories of arguments of the method for searching:
 > method_name([arg1_category1, ...], [arg2_category1, arg2_category2, arg2_category3], ...)
  
-##### Subset symbol '...'
+#### Subset symbol '...'
 As you may be wondering what the role of '...' is:
 
 If user enters '...' as (the ending) part of their input, then it specifies that the search results should be a superset of the user input. This is only applicable when user is searching categories or methods.
