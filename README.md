@@ -51,7 +51,7 @@ The searches that can be performed in the browser generally consist of the follo
 
   1. search a GAP operation by name, returns all the methods under that operation.
   2. search a number of GAP categories, returns the methods whose arguments ***altogether*** are under the specified categories.
-  3. search GAP methods by a combination of method name and categories of arguments applicable to that method.
+  3. search GAP methods by a combination of method name and specified categories of arguments applicable to that method.
   
 #### Note:
 By "***altogether***" in type 2, I mean the union set of all categories of all the arguments of a method.
@@ -61,11 +61,16 @@ Now, more specifically on type 3, the search input should be of the following fo
 
 If you only want to search for methods under certain categories and by certain method name pattern:
 > method_name(category1, category2, category3, ...)
-    
+
 If you would like to impose an order on the categories of arguments of the method for searching:
 > method_name([arg1_category1, ...], [arg2_category1, arg2_category2, arg2_category3], ...)
- 
-#### Subset symbol '...'
+
+#### Note:
+Everthing in the search input should be separated by a comma ', '.
+
+When specifying the order of the categories of arguments of a method, as shown above, the content between the delimiters '[' and ']' represent categories for a argument of the method.
+
+#### Subset Symbol '...'
 As you may be wondering what the role of '...' is:
 
 If user enters '...' as (the ending) part of their input, then it specifies that the search results should be a superset of the user input. This is only applicable when user is searching categories or methods.
@@ -101,7 +106,15 @@ For instance, to specify only the categories of the second argument of the metho
 > method_name([...], [arg2_category1, arg2_category2, arg2_category3, ...], [...], ...)
 
 it will return all the methods that match the name pattern, take at least three arguments, and at the same time, the second argument is of a superset of the categories as specified by the user.
-  
+
+
+#### Empty Argument Symbol: \void
+To search for methods that take no arguments, there are two ways:
+  1. When searching category, enter as in the search input:
+> \void
+  2. When seatching method, enter
+> method_name(\void)
+
 
 ## Hope you have fun with this browser! :)
      
