@@ -30,7 +30,7 @@ to run the dumping, use the command:
 If nothing goes wrong :), then a JSON file under the name format 'dump-current_datetime.json' will be created, which contains all the dumped information!
 
 #### Note:
-Dumping so far has only been tested on GAP version 4.12.0 and 4.12.1.
+Dumping so far has only been tested on GAP 4.12.0 & 4.12.1.
 
 ------------------------------------------------------------------------------------------------------------------------------
 ## The Browser Software with GUI:
