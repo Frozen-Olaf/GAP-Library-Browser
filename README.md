@@ -68,25 +68,33 @@ If user enters '...' as (the ending) part of their input, then it specifies that
 For example: 
 When searching the categories: 
 > IsExtLElement, IsExtRElement, IsMultiplicativeElement, IsMultiplicativeElementWithOne 
+
 it will return all the methods whose arguments **altogether** belong to exactly these categories,
-whereas
+whereas when searching:
 > IsExtLElement, IsExtRElement, IsMultiplicativeElement, IsMultiplicativeElementWithOne, ...
+
 it will return all the methods whose arguments **altogether** at least belong to these categories.
     
 When searching method (type 3):
   1. This allows user to enter '...' at the end of input, separated priorly by a comma, to search for methods which take more arguments than the currently specified argument number, and based on the current imposed argument order.
+
 For instance, when searching
 > method_name([arg1_category1, arg1_category2], [arg2_category1, arg2_category2, arg2_category3], ...)
+
 it will return all the methods that match the name pattern, at least take two arguments, and at the same time, the first two arguments are of the categories exactly as specified by the user. Methods returned can take more than two arguments as long as the condition is met.
    
   2. This allows user to specify that, for each argument of the method, whether they want to permit searching for methods that have a superset of categories at that exact argument position.
+
 For instance, when searching
 > method_name([arg1_category1, ...], [arg2_category1, ...])
+
 it will return all the methods that match the name pattern, take exactly two arguments, and at the same time, these two arguments are of a superset of the categories as specified by the user.
    
-  3. This also allows user to bypass arguments at certain positions of the method. 
+  3. This also allows user to bypass arguments at certain positions of the method.
+
 For instance, to specify only the categories of the second argument of the method to search, and ignore the first argument and the third argument, one can do
 > method_name([...], [arg2_category1, arg2_category2, arg2_category3, ...], [...], ...)
+
 it will return all the methods that match the name pattern, take at least three arguments, and at the same time, the second argument is of a superset of the categories as specified by the user.
   
 
