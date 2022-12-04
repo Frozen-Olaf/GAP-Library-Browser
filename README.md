@@ -66,11 +66,13 @@ If you would like to impose an order on the categories of arguments of the metho
 > method_name([arg1_category1, ...], [arg2_category1, arg2_category2, arg2_category3], ...)
 
 #### Note:
-Everthing in the search input should be separated by a comma ', '.
+Everthing in the search input should be separated by a comma ', '. 
+Whitespaces generally don't matter.
 
 When specifying the order of the categories of arguments of a method, as shown above, the content between the delimiters '[' and ']' represent categories for a argument of the method.
 
-#### Subset Symbol '...'
+
+### Subset Symbol '...'
 As you may be wondering what the role of '...' is:
 
 If user enters '...' as (the ending) part of their input, then it specifies that the search results should be a superset of the user input. This is only applicable when user is searching categories or methods.
@@ -108,7 +110,7 @@ For instance, to specify only the categories of the second argument of the metho
 it will return all the methods that match the name pattern, take at least three arguments, and at the same time, the second argument is of a superset of the categories as specified by the user.
 
 
-#### Empty Argument Symbol: \void
+### Empty Argument Symbol: \void
 To search for methods that take no arguments, there are two ways:
   1. When searching category, enter as in the search input:
 > \void
