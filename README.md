@@ -17,8 +17,8 @@ This part of the project is implemented by a script 'dump.g' that dumps all the 
 
 To run the dumping, a running GAP session with **package io** and **package json** loaded is required.
 If your GAP hasn't already have the two packages, they can be downloaded here:
-  * for [pkg io]: (https://gap-packages.github.io/io/)
-  * for [pkg json]: (https://gap-packages.github.io/json/)
+  * for pkg io: https://gap-packages.github.io/io/
+  * for pkg json: https://gap-packages.github.io/json/
   
 To load a pkg into a running GAP session, one can use the command:
     > LoadPackage("pkg_name");
@@ -46,14 +46,14 @@ This project CANNOT run with Java JDK < 8 (not incl. 8),
 and it has not been tested on JDK < 11 so far.
   
 
-The searches that can be performed in the browser generally consist of the following three major types:
+The searches that can be performed in the browser generally consist of the following three types:
 
   1. search a GAP operation by name, returns all the methods under that operation.
-  2. search a number of GAP categories, returns the methods whose arguments **altogether** are under the specified categories.
+  2. search a number of GAP categories, returns the methods whose arguments ***altogether*** are under the specified categories.
   3. search GAP methods by a combination of method name and categories of arguments applicable to that method.
   
 ### Note:
-By **'altogether'** in 2, I mean the union set of categories of all the arguments of a method.
+By "***altogether***" in 2, I mean the union set of categories of all the arguments of a method.
   
 Now, more specifically on 3, the search input should be of the following formats:
 
@@ -63,15 +63,15 @@ Now, more specifically on 3, the search input should be of the following formats
   If you would like to impose an order on the categories of arguments of the method for searching
     > method_name([arg1_category1, ...], [arg2_category1, arg2_category2, arg2_category3], ...)
  
-###Subset symbol...###
+### Subset symbol...
 As you may be wondering what the role of '...' is:
   If user enters '...' as (the ending) part of their input, then it specifies that the search results should be a superset of the user input. This is only applicable when user is searching categories or methods.
-  For example: 
+For example: 
     When searching the categories: 
     > IsExtLElement, IsExtRElement, IsMultiplicativeElement, IsMultiplicativeElementWithOne
-    it will return all the methods whose arguments **altogether** belong to exactly these categories, whereas
+it will return all the methods whose arguments **altogether** belong to exactly these categories, whereas
     > IsExtLElement, IsExtRElement, IsMultiplicativeElement, IsMultiplicativeElementWithOne, ...
-    it will return all the methods whose arguments **altogether** at least belong to these categories.
+it will return all the methods whose arguments **altogether** at least belong to these categories.
     
   When searching method (type 3):
   1. This allows user to enter '...' at the end of input, separated priorly by a comma, to search for methods which take more arguments than the currently specified argument number, and based on the current imposed argument order.
@@ -90,5 +90,5 @@ As you may be wondering what the role of '...' is:
   it will return all the methods that match the name pattern, take at least three arguments, and at the same time, the second argument is of a superset of the categories as specified by the user.
   
 
-##Hope you have fun with this browser! :)##
+## Hope you have fun with this browser! :)
      
