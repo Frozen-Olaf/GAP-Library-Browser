@@ -52,9 +52,9 @@ and it has not been tested on JDK < 11 yet.
 ### Search:
 The searches that can be performed in the browser generally consist of the following three types:
 
-  1. search a GAP operation by name, returns all the methods under that operation.
-  2. search a number of GAP categories, returns the methods whose arguments ***altogether*** are under the specified categories.
-  3. search GAP methods by a combination of method name and specified categories of arguments applicable to that method.
+####  1. search a GAP operation by name, returns all the methods under that operation.
+####  2. search a number of GAP categories, returns the methods whose arguments ***altogether*** are under the specified categories.
+####  3. search GAP methods by a combination of method name and specified categories of arguments applicable to that method.
   
 #### Note:
 By "***altogether***" in type 2, I mean the union set of all categories of all the arguments of a method.
@@ -103,7 +103,7 @@ it will return all the methods that match the name pattern, at least take two ar
 For instance, when searching
 > method_name([arg1_category1, ...], [arg2_category1, ...])
 
-it will return all the methods that match the name pattern, take exactly two arguments, and at the same time, these two arguments are of a superset of the categories as specified by the user.
+it will return all the methods that match the name pattern, take exactly two arguments, and at the same time, each of these two arguments is of a superset of the categories as specified by the user at that argument position.
    
   3. This also allows user to bypass arguments at certain positions of the method.
 
