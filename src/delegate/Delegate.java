@@ -103,9 +103,7 @@ public class Delegate implements PropertyChangeListener {
         menu = new JMenuBar();
         JMenu file = new JMenu("File");
         JMenuItem load = new JMenuItem("Load");
-        JMenuItem save = new JMenuItem("Save");
         file.add(load);
-        file.add(save);
         menu.add(file);
 
         fileChooser = new JFileChooser();
