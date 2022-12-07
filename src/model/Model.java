@@ -93,12 +93,12 @@ public class Model {
         return ctgrySet.stream().collect(Collectors.toList());
     }
 
-    public static List<String> getNonDuplicateSearchHisotryInList() {
-        return (searchHistoySet.stream().map(Pair::getKey).collect(Collectors.toSet()))
-                .stream().collect(Collectors.toList());
+    public static List<String> getNonDuplicateSearchHisotryInList(int modelState) {
+        return searchHistoySet.stream().filter(sh -> sh.getValue()==modelState)
+                .map(Pair::getKey).collect(Collectors.toList());
     }
 
-    public static Set<Pair<String, Integer>> getSearchHisotrySet() {
+    public static Set<Pair<String, Integer>> getSearchHisotryInSet() {
         return searchHistoySet;
     }
 

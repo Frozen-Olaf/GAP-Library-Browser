@@ -74,7 +74,7 @@ public class SearchBar extends JPanel{
     
     private static List<String> newSearchSuggestion(String input) {
     	
-        List<String> searchHistories = Model.getNonDuplicateSearchHisotryInList();
+        List<String> searchHistories = Model.getNonDuplicateSearchHisotryInList(Model.getModelState());
     	
     	Set<String> suggestions = searchHistories.stream()
     			.filter(s -> s.startsWith(input))
@@ -114,7 +114,7 @@ public class SearchBar extends JPanel{
     	searchBtn.addActionListener(new ActionListener() {
     		@Override
     		public void actionPerformed(ActionEvent e) {
-            	performSearch();
+            	performSearch(Model.getModelState());
     		}
     	});
     	searchBtn.addMouseListener(new MouseAdapter() {
@@ -131,22 +131,22 @@ public class SearchBar extends JPanel{
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					performSearch();
+					performSearch(Model.getModelState());
 				}
 			}
     	});
     	frame.getRootPane().setDefaultButton(searchBtn);
     }
 
-    private void performSearch() {
+    private void performSearch(int modelState) {
     	String toSearch = searchInput.getText().trim();
     	
-    	if (Model.getSearchHisotrySet().contains(new ImmutablePair<String, Integer>(toSearch, Model.getModelState()))) {
+    	if (Model.getSearchHisotryInSet().contains(new ImmutablePair<String, Integer>(toSearch, modelState))) {
     		Delegate.multiPages.changeToPage(toSearch);
     		return;
     	}
 
-    	if (Model.getModelState() == Model.STATE_IDLE) {
+    	if (modelState == Model.STATE_IDLE) {
     		SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                 	JOptionPane.showMessageDialog(frame, "Please tick one checkbox to\n"
@@ -157,22 +157,22 @@ public class SearchBar extends JPanel{
     	else {
         	Page p = null;
         	List<Method> res = null;
-			if (Model.getModelState() == Model.SEARCH_OPERATION) {
+			if (modelState == Model.SEARCH_OPERATION) {
 	        	if ((res = model.searchOpt(toSearch)) != null)
 	        		p = new Page(toSearch, res, Model.SEARCH_OPERATION);
 			} 
-			else if (Model.getModelState() == Model.SEARCH_CATEGORY) {
+			else if (modelState == Model.SEARCH_CATEGORY) {
 	        	if ((res = model.searchCategory(toSearch)) != null)
 	        		p = new Page(toSearch, res, Model.SEARCH_CATEGORY);
 			}
-			else if (Model.getModelState() == Model.SEARCH_METHOD) {
+			else if (modelState == Model.SEARCH_METHOD) {
 	        	if ((res = model.searchMethodWithCategory(toSearch)) != null)
 	        		p = new Page(toSearch, res, Model.SEARCH_METHOD);
 			} 
 			else return;
 			if (res!=null && p!=null) {
 			    Delegate.multiPages.changeToPage(p.getName());
-                Model.getSearchHisotrySet().add(new ImmutablePair<String, Integer>(toSearch, Model.getModelState()));
+                Model.getSearchHisotryInSet().add(new ImmutablePair<String, Integer>(toSearch, modelState));
 			}
     	}
 
