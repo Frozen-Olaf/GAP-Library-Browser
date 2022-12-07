@@ -16,15 +16,13 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
 	public Component getTableCellRendererComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus,
 			int row, int column) {
-		super.getTableCellRendererComponent(table, value, isSelected, false, row, column);
-        setHorizontalAlignment(JLabel.LEFT);
-		if (value!=null) {
-		    setToolTipText(value.toString());
-			if (isFilePath)
-				setText("<html><u><font color='blue'>"+value.toString()+"</u></html>");
-		}
-		else setToolTipText("N/A");
-		return this;
+	    super.getTableCellRendererComponent(table, value, isSelected, false, row, column);
+	    setHorizontalAlignment(JLabel.LEFT);
+	    setToolTipText(value.toString());
+	    if (isFilePath)
+	        setText("<html><u><font color='blue'>"+value.toString()+"</u></html>");
+
+	    return this;
 	}
 
     private static final long serialVersionUID = 1L;
