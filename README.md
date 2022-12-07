@@ -1,5 +1,5 @@
 # GAP-Library-Browser
-## version: v0.1
+## version: v0.1.1
 ### This project is a tool to browse the libraries and packages of the GAP system.
 ### It consists of two parts: 
 ###  1. Dumping of GAP (written in GAP language)
