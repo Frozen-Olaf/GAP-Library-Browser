@@ -197,7 +197,7 @@ public class Page extends JPanel {
 					data[i][j] = Method.getCategoriesInOneLine(argCtgrys[j-1]);
 				}
 				for (int j=methodArgNum+1; j<=maxArgNum; j++) {
-					data[i][j] = null;
+					data[i][j] = "N/A";
 				}
 			}	
 			else { 	
