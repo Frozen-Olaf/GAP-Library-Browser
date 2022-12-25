@@ -6,7 +6,7 @@
   * Added a filtering option in search result page that can filter out "trivial" methods for display. Trivial methods are: 
     - system getters and setters
     - system mutable setters
-    - default methods that do nothing, from method installation
+    - default methods that do nothing, derived from method installation
   * Updated some GUI component and fixed some bugs.
   
 ------------------------------------------------------------------------------------------------------------------------------
