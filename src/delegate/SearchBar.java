@@ -17,6 +17,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.ParallelGroup;
+import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -40,68 +42,88 @@ public class SearchBar extends JPanel{
     private JPanel cbPanel;
     private JCheckBox cbMethod;
     private JCheckBox cbOpt;
-    private JCheckBox cbCategory;
-    private JCheckBox[] cbs = new JCheckBox[3];
+    private JCheckBox cbFilter;
+    
+    private boolean isPrimary;
+    
+    private Page page;
     
     private final JFrame frame;
     private final Model model;
     
-    public SearchBar(JFrame frame, Model model) {
+    public SearchBar(JFrame frame, Model model, Page page, boolean isPrimary) {
     	super();
     	this.frame = frame;
     	this.model = model;
+    	this.page = page;
+    	
+    	this.isPrimary = isPrimary;
     	
     	init();
-    	
-    	setupCheckBoxLayout();
-    	setupLayout();
     }
     
+    public void setDefaultSearch() {
+        frame.getRootPane().setDefaultButton(searchBtn);
+        setSearchState();
+    }
+    
+    private void setSearchState() {
+        if (cbMethod.isSelected()) {
+            Model.setModelState(Model.STATE_SEARCH_METHOD);
+        }
+        else if (cbOpt.isSelected()){
+            Model.setModelState(Model.STATE_SEARCH_OPERATION);
+        }
+        else if (cbFilter.isSelected()) {
+            Model.setModelState(Model.STATE_SEARCH_FILTER);
+        }
+        else Model.setModelState(Model.STATE_IDLE);
+    }
+
     private void init() {
     	search = new JLabel("Search:");
     	searchInput = new JTextField("Please enter here to search...");
-
     	SuggestionDropDownDecorator.decorate(searchInput,
                 new TextComponentWordSuggestionClient(SearchBar::newSearchSuggestion));
-    	
+
     	Dimension st = search.getPreferredSize();
     	st.height += 20;
     	searchInput.setPreferredSize(st);
+    	searchInput.setMinimumSize(new Dimension(0, st.height));
 
     	initSearchButton();
     	initCheckBoxes();
+    	
+    	setupPrimaryLayout();
     }
-    
+
     private static List<String> newSearchSuggestion(String input) {
-    	
+
         List<String> searchHistories = Model.getNonDuplicateSearchHisotryInList(Model.getModelState());
-    	
+
     	Set<String> suggestions = searchHistories.stream()
     			.filter(s -> s.startsWith(input))
     			.limit(5)
     			.collect(Collectors.toSet());
 
-    	if (Model.getModelState() == Model.SEARCH_OPERATION) {
+    	if (Model.getModelState() == Model.STATE_SEARCH_OPERATION) {
     		List<String> optns = Model.getAllOperationsInList();
     		List<String> filtered = optns.stream()
     				.filter(c -> c.startsWith(input))
-    				.limit(20)
     				.collect(Collectors.toList());
     		suggestions.addAll(filtered);
-    	} 
-    	else if (Model.getModelState() == Model.SEARCH_CATEGORY) {
-    		List<String> ctgrys = Model.getAllCategoriesInList();
+    	}
+    	else if (Model.getModelState() == Model.STATE_SEARCH_FILTER) {
+    		List<String> ctgrys = Model.getAllFiltersInList();
     		List<String> filtered = ctgrys.stream()
     				.filter(c -> c.startsWith(input))
-    				.limit(20)
     				.collect(Collectors.toList());
     		suggestions.addAll(filtered);
-    	} 
-    	else if (Model.getModelState() == Model.SEARCH_METHOD) {
+    	}
+    	else if (Model.getModelState() == Model.STATE_SEARCH_METHOD) {
     		List<Method> methods = Model.getAllMethodsInList();
     		List<Method> filtered = methods.stream()
     				.filter(m -> m.getName().startsWith(input))
-    				.limit(20)
     				.collect(Collectors.toList());
     		filtered.forEach(m -> suggestions.add(m.getName()));
     	}
@@ -142,67 +164,70 @@ public class SearchBar extends JPanel{
     	String toSearch = searchInput.getText().trim();
     	
     	if (Model.getSearchHisotryInSet().contains(new ImmutablePair<String, Integer>(toSearch, modelState))) {
-    		Delegate.multiPages.changeToPage(toSearch);
-    		return;
+    		if (Delegate.multiPages.changeToPage(toSearch))
+    		    return;
     	}
 
     	if (modelState == Model.STATE_IDLE) {
     		SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                 	JOptionPane.showMessageDialog(frame, "Please tick one checkbox to\n"
-                			+ "speficy your intended searching type.");;
+                			+ "speficy your intended searching type.");
                 }
             });
     	}
     	else {
-        	Page p = null;
+        	ResultPage p = null;
         	List<Method> res = null;
-			if (modelState == Model.SEARCH_OPERATION) {
+			if (modelState == Model.STATE_SEARCH_OPERATION) {
 	        	if ((res = model.searchOpt(toSearch)) != null)
-	        		p = new Page(toSearch, res, Model.SEARCH_OPERATION);
+	        		p = new ResultPage(frame, model, toSearch, res, Model.STATE_SEARCH_OPERATION);
 			} 
-			else if (modelState == Model.SEARCH_CATEGORY) {
-	        	if ((res = model.searchCategory(toSearch)) != null)
-	        		p = new Page(toSearch, res, Model.SEARCH_CATEGORY);
+			else if (modelState == Model.STATE_SEARCH_FILTER) {
+	        	if ((res = model.searchFilter(toSearch)) != null)
+	        		p = new ResultPage(frame, model, toSearch, res, Model.STATE_SEARCH_FILTER);
 			}
-			else if (modelState == Model.SEARCH_METHOD) {
-	        	if ((res = model.searchMethodWithCategory(toSearch)) != null)
-	        		p = new Page(toSearch, res, Model.SEARCH_METHOD);
+			else if (modelState == Model.STATE_SEARCH_METHOD) {
+	        	if ((res = model.searchMethodWithFilter(toSearch)) != null)
+	        		p = new ResultPage(frame, model, toSearch, res, Model.STATE_SEARCH_METHOD);
 			} 
 			else return;
 			if (res!=null && p!=null) {
-			    Delegate.multiPages.changeToPage(p.getName());
+			    Delegate.multiPages.changeToPage(p);
+			    page.next = p;
+			    p.prev = page;
                 Model.getSearchHisotryInSet().add(new ImmutablePair<String, Integer>(toSearch, modelState));
 			}
     	}
-
     }
     
     private void initCheckBoxes() {
-    	cbPanel = new JPanel();
+    	cbPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+        cbPanel.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+        cbMethod = new JCheckBox("Method");
     	cbOpt = new JCheckBox("Operation");
-    	cbCategory = new JCheckBox("Category"); 
-    	cbMethod = new JCheckBox("Method");
-    	cbs[0] = cbOpt;
-    	cbs[1] = cbOpt;
-    	cbs[2] = cbMethod;
+    	cbFilter = new JCheckBox("Filter");
+
+        cbPanel.add(cbMethod);
+        cbPanel.add(cbOpt);
+        cbPanel.add(cbFilter);
     	
     	ItemListener il = new ItemListener() {
     		public void itemStateChanged(ItemEvent e) { 
     			if (e.getSource().equals(cbOpt) && cbOpt.isSelected()) {
-    				cbCategory.setSelected(false);
+    			    cbFilter.setSelected(false);
     				cbMethod.setSelected(false);
-    				Model.setModelState(Model.SEARCH_OPERATION);
+    				Model.setModelState(Model.STATE_SEARCH_OPERATION);
     			}
-    			else if (e.getSource().equals(cbCategory) && cbCategory.isSelected()) {
+    			else if (e.getSource().equals(cbFilter) && cbFilter.isSelected()) {
     				cbOpt.setSelected(false);
     				cbMethod.setSelected(false);
-    				Model.setModelState(Model.SEARCH_CATEGORY);
+    				Model.setModelState(Model.STATE_SEARCH_FILTER);
     			}
     			else if (e.getSource().equals(cbMethod) && cbMethod.isSelected()) {
     				cbOpt.setSelected(false);
-    				cbCategory.setSelected(false);
-    				Model.setModelState(Model.SEARCH_METHOD);
+    				cbFilter.setSelected(false);
+    				Model.setModelState(Model.STATE_SEARCH_METHOD);
     			}
     			else {
     				Model.setModelState(Model.STATE_IDLE);
@@ -210,16 +235,14 @@ public class SearchBar extends JPanel{
     		}  
     	};   
     	cbOpt.addItemListener(il);
-    	cbCategory.addItemListener(il); 
+    	cbFilter.addItemListener(il); 
     	cbMethod.addItemListener(il);    
     }
-
     
-    private void setupLayout() {
+    private void setupPrimaryLayout() {
     	GroupLayout layout = new GroupLayout(this);
-
-    	layout.setAutoCreateGaps(true);
-    	layout.setAutoCreateContainerGaps(true);
+    	layout.setAutoCreateGaps(isPrimary);
+    	layout.setAutoCreateContainerGaps(isPrimary);
 
     	layout.setHorizontalGroup(
     			layout.createSequentialGroup()
@@ -229,29 +252,25 @@ public class SearchBar extends JPanel{
     					.addComponent(cbPanel))
     			.addComponent(searchBtn)
     			);
-    	layout.setVerticalGroup(
-    			layout.createSequentialGroup()
-    			.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-    					.addComponent(search)
-    					.addComponent(searchInput)
-    					.addComponent(searchBtn))
-    			.addComponent(cbPanel)
-    			);
+
+        ParallelGroup pg = layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                .addComponent(search)
+                .addComponent(searchInput)
+                .addComponent(searchBtn);
+
+        SequentialGroup sg = layout.createSequentialGroup()
+                .addGroup(pg);
     	
+    	if (isPrimary) {
+    	    sg.addComponent(cbPanel);
+    	} 
+    	else {
+    	    sg.addGap(0).addComponent(cbPanel);
+    	}
+    	layout.setVerticalGroup(sg);
+	
     	this.setLayout(layout);
     }
-    
-    private void setupCheckBoxLayout() {
-    	FlowLayout cbLayout = new FlowLayout(FlowLayout.LEADING);
-    	
-    	cbPanel.setLayout(cbLayout);
-    	
-    	cbPanel.add(cbMethod);
-    	cbPanel.add(cbOpt);
-    	cbPanel.add(cbCategory);
-    	cbPanel.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-    }
-    
 
     private static final long serialVersionUID = 1L;
 }
