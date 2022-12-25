@@ -17,6 +17,7 @@ class CustomTableModel extends DefaultTableModel {
             return Integer.class;
         else return String.class;  //other columns accept String values
     }
-    
+
+
     private static final long serialVersionUID = 1L;
 }

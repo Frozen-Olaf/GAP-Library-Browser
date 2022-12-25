@@ -19,9 +19,9 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
 	    super.getTableCellRendererComponent(table, value, isSelected, false, row, column);
 	    setHorizontalAlignment(JLabel.LEFT);
 	    setToolTipText(value.toString());
-	    if (isFilePath)
+	    if (isFilePath) {
 	        setText("<html><u><font color='blue'>"+value.toString()+"</u></html>");
-
+	    }
 	    return this;
 	}
 

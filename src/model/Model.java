@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -28,31 +29,33 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.SetMultimap;
 import com.google.common.primitives.Booleans;
 
+import net.coobird.thumbnailator.Thumbnails;
+
 public class Model {
 
     public static final int STATE_IDLE = 0;
-    public static final int SEARCH_OPERATION = 1;
-    public static final int SEARCH_CATEGORY = 2;
-    public static final int SEARCH_METHOD = 3;
+    public static final int STATE_SEARCH_OPERATION = 1;
+    public static final int STATE_SEARCH_FILTER = 2;
+    public static final int STATE_SEARCH_METHOD = 3;
     private static int state = STATE_IDLE;
 
-    private static String gapRootDir;
-    private static BufferedImage iconImage;
+    private static String GAP_ROOT_DIRECTORY;
+    private static final int ICON_SIZE = 16;
+    private static final BufferedImage gapIconImage = createIconImage("/images/GAP-icon.png");
+    private static final ImageIcon leftArrowIcon = createIcon(ICON_SIZE,ICON_SIZE,"/images/left-arrow.png");
+    private static final ImageIcon rightArrowIcon = createIcon(ICON_SIZE,ICON_SIZE,"/images/right-arrow.png");
 
     private static final SetMultimap<String, Method> optnToMethodMap = LinkedHashMultimap.create();
-    private static final SetMultimap<Set<String>, Method> ctgryToMethodMap = LinkedHashMultimap.create();
+    private static final SetMultimap<Set<String>, Method> filterToMethodMap = LinkedHashMultimap.create();
 
-    private static final Set<String> ctgrySet = new HashSet<String>();
+    private static final Set<String> filterSet = new HashSet<String>();
     private static final Set<Pair<String, Integer>> searchHistoySet = new LinkedHashSet<Pair<String, Integer>>();
-    private static final Set<String> emptyCtgrySet = new HashSet<String>();
+    private static final Set<String> emptyFilterSet = new HashSet<String>();
 
     private PropertyChangeSupport notifier;
 
     public Model() {
         notifier = new PropertyChangeSupport(this);
-        try {
-            iconImage = ImageIO.read(Model.class.getResource("/images/GAP_icon.png"));
-        } catch (Exception e) {e.printStackTrace();}
     }
 
     /**
@@ -65,7 +68,7 @@ public class Model {
         notifier.addPropertyChangeListener("illf", listener);
         notifier.addPropertyChangeListener("404", listener);
         notifier.addPropertyChangeListener("rtdir", listener);
-        notifier.addPropertyChangeListener("illctg", listener);
+        notifier.addPropertyChangeListener("illflt", listener);
         notifier.addPropertyChangeListener("success", listener);
     }
 
@@ -78,7 +81,7 @@ public class Model {
     }
 
     public static String getGapRootDir() {
-        return gapRootDir;
+        return GAP_ROOT_DIRECTORY;
     }
 
     public static List<String> getAllOperationsInList(){
@@ -86,11 +89,11 @@ public class Model {
     }
 
     public static List<Method> getAllMethodsInList(){
-        return ctgryToMethodMap.values().stream().collect(Collectors.toList());
+        return filterToMethodMap.values().stream().collect(Collectors.toList());
     }
 
-    public static List<String> getAllCategoriesInList(){
-        return ctgrySet.stream().collect(Collectors.toList());
+    public static List<String> getAllFiltersInList(){
+        return filterSet.stream().collect(Collectors.toList());
     }
 
     public static List<String> getNonDuplicateSearchHisotryInList(int modelState) {
@@ -101,11 +104,54 @@ public class Model {
     public static Set<Pair<String, Integer>> getSearchHisotryInSet() {
         return searchHistoySet;
     }
+    
+    public static BufferedImage getGAPIconImage() {
+        return gapIconImage;
+    }
 
-    public static BufferedImage getIconImage() {
-        return iconImage;
+    public static ImageIcon getLeftArrowIcon() {
+        return leftArrowIcon;
     }
     
+    public static ImageIcon getRightArrowIcon() {
+        return rightArrowIcon;
+    }
+    
+    private static BufferedImage createIconImage(String path) {
+        try {
+            return ImageIO.read(Model.class.getResource(path));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static ImageIcon createGAPIcon(int width, int height) {
+        try {
+            BufferedImage thumbnail = Thumbnails.of(gapIconImage)
+                    .size(width, height)
+                    .keepAspectRatio(true)
+                    .asBufferedImage();
+            return new ImageIcon(thumbnail);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private static final ImageIcon createIcon(int width, int height, String path) {
+        try {
+            BufferedImage original = ImageIO.read(Model.class.getResource(path));
+            BufferedImage thumbnail = Thumbnails.of(original)
+                    .size(width, height)
+                    .keepAspectRatio(true)
+                    .asBufferedImage();
+            return new ImageIcon(thumbnail);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     /**
      * The argument file must start with the GAP rtdir as its first line, and the dumped content (dense) follows.
@@ -126,7 +172,7 @@ public class Model {
                 notifier.firePropertyChange("rtdir", null, rootDir.getCanonicalPath());
                 return;
             }
-            Model.gapRootDir = rootDirPath;
+            Model.GAP_ROOT_DIRECTORY = rootDirPath;
             while ((line = br.readLine()) != null) {
                 readLineFromJson(line);
             }
@@ -171,20 +217,20 @@ public class Model {
         }
 
         JSONArray methods = obj.getJSONArray("methods");
-        String rootDirPattern = Pattern.quote(gapRootDir);
+        String rootDirPattern = Pattern.quote(GAP_ROOT_DIRECTORY);
 
         for (int i=0; i<methods.length(); i++) {
             JSONObject method = (JSONObject) methods.get(i);
             String mthdName = method.getString("mthd_name").trim();
             JSONObject property = (JSONObject) method.get("property");
 
-            JSONArray JSONArgCtgry = property.getJSONArray("categories");
-            int numArgs = JSONArgCtgry.length();
-            String[][] argCtgrys = new String[numArgs][];
+            JSONArray JSONArgFilter = property.getJSONArray("filters");
+            int numArgs = JSONArgFilter.length();
+            String[][] argFilters = new String[numArgs][];
             for (int j=0; j<numArgs; j++) {
-                String[] categories = JSONArrayToStringArray((JSONArray)JSONArgCtgry.get(j));
-                argCtgrys[j] = categories;
-                ctgrySet.addAll(Arrays.asList(categories));
+                String[] filters = JSONArrayToStringArray((JSONArray)JSONArgFilter.get(j));
+                argFilters[j] = filters;
+                filterSet.addAll(Arrays.asList(filters));
             }
 
             // Handle unexpected fraction number for rank
@@ -192,14 +238,14 @@ public class Model {
 
             JSONObject src = (JSONObject) method.get("src");
             String filePath = src.getString("file_path").trim();
-            filePath = filePath.replaceFirst(rootDirPattern, ".");
+            filePath = filePath.replaceFirst(rootDirPattern, "./");
 
             int lineNumStart = src.getInt("line_num_start");
             int lineNumEnd = src.getInt("line_num_end");
 
-            Method mthd = new Method(mthdName, argCtgrys, parseFractionToInteger(rank.toString()), filePath, lineNumStart, lineNumEnd);
+            Method mthd = new Method(mthdName, argFilters, parseFractionToInteger(rank.toString()), filePath, lineNumStart, lineNumEnd);
             optnToMethodMap.put(optName.trim(), mthd);
-            ctgryToMethodMap.put(Method.getUniqueCategories(argCtgrys), mthd);
+            filterToMethodMap.put(Method.getUniqueFilters(argFilters), mthd);
         }
     }
 
@@ -232,45 +278,45 @@ public class Model {
         return null;
     }
 
-    public List<Method> searchCategory(String toSearch) {
+    public List<Method> searchFilter(String toSearch) {
         
-        return searchCategoryHelper(toSearch, checkSubsetFlag(toSearch, false));
+        return searchByFilter(toSearch, checkSubsetFlag(toSearch, false));
     }
 
-    private List<Method> searchCategoryHelper(String input, boolean isSubsetFlag){
+    private List<Method> searchByFilter(String input, boolean isSubsetFlag){
         
-        String[] ctgrys = Arrays.stream(input.split(",")).map(String::trim).toArray(String[]::new);
-        String last = ctgrys[ctgrys.length-1];
-        if (ctgrys.length == 1) {
+        String[] filters = Arrays.stream(input.split(",")).map(String::trim).toArray(String[]::new);
+        String last = filters[filters.length-1];
+        if (filters.length == 1) {
             if (isSubsetFlag) 
                 return getAllMethodsInList();
             else if (last.equals("\\void")) {
                 // search input '\void' to search methods that take no arguments.
-                List<Method> res = (ctgryToMethodMap.get(emptyCtgrySet)).stream().collect(Collectors.toList());
+                List<Method> res = (filterToMethodMap.get(emptyFilterSet)).stream().collect(Collectors.toList());
                 if (!res.isEmpty()) return res;
-                notifier.firePropertyChange("404", null, "Methods under the specified category");
+                notifier.firePropertyChange("404", null, "Methods under the specified filter");
                 return null;
             }
         }
 
-        Set<String> ctgrysFound = new HashSet<String>();
-        List<String> ctgrysNotFound = new ArrayList<String>();
-        if (!findMatchingCategories(ctgrys, isSubsetFlag, ctgrysFound, ctgrysNotFound)) {
-            notifier.firePropertyChange("404", null, "Entered categories all");
+        Set<String> filtersFound = new HashSet<String>();
+        List<String> filtersNotFound = new ArrayList<String>();
+        if (!findMatchingFilters(filters, isSubsetFlag, filtersFound, filtersNotFound)) {
+            notifier.firePropertyChange("404", null, "Entered filters all");
             return null;
         }
-        displayCategoriesNotFound(ctgrysFound, ctgrysNotFound);
+        displayFiltersNotFound(filtersFound, filtersNotFound);
 
-        return findMatchingMethodsFromCategories(ctgrysFound, isSubsetFlag);
+        return findMatchingMethodsFromFilters(filtersFound, isSubsetFlag);
     }
 
     /**
-     * Method search input format 1: method_name(ctgry1, ctgry2, ...)
-     * Method search input format 2: method_name([arg1_ctgry1, arg1_ctgry2, ...], [arg2_ctgry1, arg2_ctgry2, ...], ...)
+     * Method search input format 1: method_name(filter1, filter2, ...)
+     * Method search input format 2: method_name([arg1_filter1, arg1_filter2, ...], [arg2_filter1, arg2_filter2, ...], ...)
      * @param toSearch
      * @return
      */
-    public List<Method> searchMethodWithCategory(String toSearch) {
+    public List<Method> searchMethodWithFilter(String toSearch) {
 
         String mthdName = StringUtils.substringBefore(toSearch, "(").trim();
         if (mthdName.equals("..."))
@@ -280,88 +326,88 @@ public class Model {
         int indexBack= toSearch.lastIndexOf(')');
         if (mthdName.length()==0 || indexFore==-1 || indexBack==-1 || indexFore>indexBack) {
             notifier.firePropertyChange("illf", null, "Unsupported input format for searching the method " +toSearch+ "\n"
-                    + "try: method_name(category1[, category2[, ...]])");
+                    + "try: method_name(filter1[, filter2[, ...]])");
             return null;
         }
-        String ctgrys = toSearch.substring(indexFore+1, indexBack).trim();
+        String filters = toSearch.substring(indexFore+1, indexBack).trim();
 
         List<Method> res;
-        boolean isOfArgOrderFlag = checkArgOrderFlag(ctgrys);
-        boolean isSubsetFlag = checkSubsetFlag(ctgrys, isOfArgOrderFlag);
+        boolean isOfArgOrderFlag = checkArgOrderFlag(filters);
+        boolean isSubsetFlag = checkSubsetFlag(filters, isOfArgOrderFlag);
         if (isOfArgOrderFlag) {
-            return searchCategoryOfArgumentOrder(mthdName, ctgrys, isSubsetFlag);
+            return searchFilterOfArgumentOrder(mthdName, filters, isSubsetFlag);
         }
         else {
-            List<Method> ml = searchCategoryHelper(ctgrys, isSubsetFlag);
+            List<Method> ml = searchByFilter(filters, isSubsetFlag);
             if (ml == null) return null;
 
             res = ml.stream().filter(mthd -> mthd.getName().contains(mthdName)).collect(Collectors.toList());
             if (!res.isEmpty()) return res;
-            notifier.firePropertyChange("404", null, "Method with specified categories");
+            notifier.firePropertyChange("404", null, "Method with specified filters");
             return null;
         }
     }
 
-    private List<Method> searchCategoryOfArgumentOrder(String mthdName, String ctgrysToSearch, boolean isArgNumSubsetFlag) {
+    private List<Method> searchFilterOfArgumentOrder(String mthdName, String filtersToSearch, boolean isArgNumSubsetFlag) {
 
-        String[] argCtgrys = StringUtils.substringsBetween(ctgrysToSearch, "[", "]");
-        int argNum = argCtgrys.length;
-        List<Set<String>> ctgrysOfArg = new ArrayList<Set<String>>();
+        String[] argFilters = StringUtils.substringsBetween(filtersToSearch, "[", "]");
+        int argNum = argFilters.length;
+        List<Set<String>> filtersOfArg = new ArrayList<Set<String>>();
 
-        Set<String> ctgrysFound = new HashSet<String>();
-        List<String> ctgrysNotFound = new ArrayList<String>();
+        Set<String> filtersFound = new HashSet<String>();
+        List<String> filtersNotFound = new ArrayList<String>();
         boolean[] isSubsetFlags = new boolean[argNum];
-        for (int i=0; i<argCtgrys.length; i++) {
-            isSubsetFlags[i] = checkSubsetFlag(argCtgrys[i], false);
-            String[] ctgrys = Arrays.stream(argCtgrys[i].split(",")).map(String::trim).toArray(String[]::new);
-            if (isSubsetFlags[i] && ctgrys.length==1) {
-                // if [,,,] is specified for an argument, then it will be treated as argument of any category is applicable.
-                ctgrysOfArg.add(emptyCtgrySet);
+        for (int i=0; i<argFilters.length; i++) {
+            isSubsetFlags[i] = checkSubsetFlag(argFilters[i], false);
+            String[] filters = Arrays.stream(argFilters[i].split(",")).map(String::trim).toArray(String[]::new);
+            if (isSubsetFlags[i] && filters.length==1) {
+                // if [,,,] is specified for an argument, then it will be treated as argument of any filter is applicable.
+                filtersOfArg.add(emptyFilterSet);
                 continue;
             }
             if (isSubsetFlags[i])
-                ctgrysOfArg.add(Arrays.asList(ctgrys).subList(0, ctgrys.length-1).stream().collect(Collectors.toSet()));
+                filtersOfArg.add(Arrays.asList(filters).subList(0, filters.length-1).stream().collect(Collectors.toSet()));
             else {
-                ctgrysOfArg.add(Arrays.stream(ctgrys).collect(Collectors.toSet()));
+                filtersOfArg.add(Arrays.stream(filters).collect(Collectors.toSet()));
             }
-            if (!findMatchingCategories(ctgrys, isSubsetFlags[i], ctgrysFound, ctgrysNotFound)) {
-                notifier.firePropertyChange("404", null, "Entered categories at arg "+ i+1 +" all");
+            if (!findMatchingFilters(filters, isSubsetFlags[i], filtersFound, filtersNotFound)) {
+                notifier.firePropertyChange("404", null, "Entered filters at arg "+ i+1 +" all");
                 return null;
             }
         }
-        displayCategoriesNotFound(ctgrysFound, ctgrysNotFound);
+        displayFiltersNotFound(filtersFound, filtersNotFound);
 
-        List<Method> methodsMatchedCtgrys;
-        List<Method> methodsMatchedCtgrysAndNames = new ArrayList<Method>();
+        List<Method> methodsMatchedFilters;
+        List<Method> methodsMatchedFiltersAndNames = new ArrayList<Method>();
         boolean isArgCtgrySubsetFlag = Booleans.contains(isSubsetFlags, true);
 
-        methodsMatchedCtgrys = findMatchingMethodsFromCategories(ctgrysFound, (isArgNumSubsetFlag || isArgCtgrySubsetFlag));
-        if (methodsMatchedCtgrys==null) return null;
-        for (Method mthd : methodsMatchedCtgrys) {
+        methodsMatchedFilters = findMatchingMethodsFromFilters(filtersFound, (isArgNumSubsetFlag || isArgCtgrySubsetFlag));
+        if (methodsMatchedFilters==null) return null;
+        for (Method mthd : methodsMatchedFilters) {
             if (mthd.getName().contains(mthdName)) {
                 if (mthd.getArgNumber()==argNum) {
-                    methodsMatchedCtgrysAndNames.add(mthd);
+                    methodsMatchedFiltersAndNames.add(mthd);
                 }
                 else if (isArgNumSubsetFlag && mthd.getArgNumber()>argNum)
-                    methodsMatchedCtgrysAndNames.add(mthd);
+                    methodsMatchedFiltersAndNames.add(mthd);
             }
         }
         List<Method> res = new ArrayList<Method>();
         boolean isArgNameAndOrderMatch;
-        if(!methodsMatchedCtgrysAndNames.isEmpty()) {
-            for (Method mthd : methodsMatchedCtgrysAndNames) {
+        if(!methodsMatchedFiltersAndNames.isEmpty()) {
+            for (Method mthd : methodsMatchedFiltersAndNames) {
                 isArgNameAndOrderMatch = true;
-                String [][] mthdArgCategories = mthd.getArgCategories();
+                String [][] mthdArgFilters = mthd.getArgFilters();
                 for (int i=0; i<argNum; i++) {
-                    Set<String> argCtgrySet = Arrays.stream(mthdArgCategories[i]).collect(Collectors.toSet());
+                    Set<String> argCtgrySet = Arrays.stream(mthdArgFilters[i]).collect(Collectors.toSet());
                     if (isSubsetFlags[i]) {
-                        if (!argCtgrySet.containsAll(ctgrysOfArg.get(i))) {
+                        if (!argCtgrySet.containsAll(filtersOfArg.get(i))) {
                             isArgNameAndOrderMatch = false;
                             break;
                         }
                     }
                     else {
-                        if (!argCtgrySet.equals(ctgrysOfArg.get(i))) {
+                        if (!argCtgrySet.equals(filtersOfArg.get(i))) {
                             isArgNameAndOrderMatch = false;
                             break;
                         }
@@ -372,7 +418,7 @@ public class Model {
             }
             if (!res.isEmpty()) return res;
         }
-        notifier.firePropertyChange("404", null, "Method with specified categories");
+        notifier.firePropertyChange("404", null, "Method with specified filters");
         return null;
     }
 
@@ -402,48 +448,48 @@ public class Model {
         }
     }
 
-    private boolean findMatchingCategories(String[] ctgrys, boolean isSubsetFlag, Set<String> ctgrysFound, List<String> ctgrysNotFound) {
+    private boolean findMatchingFilters(String[] filters, boolean isSubsetFlag, Set<String> filtersFound, List<String> filtersNotFound) {
         
-        for (int i=0; i<ctgrys.length; i++) {
-            if (isSubsetFlag && i==ctgrys.length-1) break;
-            if (ctgrySet.contains(ctgrys[i])) {
-                ctgrysFound.add(ctgrys[i]);
+        for (int i=0; i<filters.length; i++) {
+            if (isSubsetFlag && i==filters.length-1) break;
+            if (filterSet.contains(filters[i])) {
+                filtersFound.add(filters[i]);
             } 
             else {
-                ctgrysNotFound.add(ctgrys[i]);
+                filtersNotFound.add(filters[i]);
             }
         }
-        return !ctgrysFound.isEmpty();
+        return !filtersFound.isEmpty();
     }
 
-    private void displayCategoriesNotFound(Set<String> ctgrysFound, List<String> ctgrysNotFound) {
+    private void displayFiltersNotFound(Set<String> filtersFound, List<String> filtersNotFound) {
         
-        if (!ctgrysNotFound.isEmpty()) {
-            String illInputs = ctgrysNotFound.stream().collect(Collectors.joining(", "));
-            String validInputs = ctgrysFound.stream().collect(Collectors.joining(", "));
-            String message = "In the entered categories: [" + illInputs + "] not found.\n"
-                    + "Only searching for categories: [" + validInputs + "].";
-            notifier.firePropertyChange("illctg", null, message);
+        if (!filtersNotFound.isEmpty()) {
+            String illInputs = filtersNotFound.stream().collect(Collectors.joining(", "));
+            String validInputs = filtersFound.stream().collect(Collectors.joining(", "));
+            String message = "In the entered filters: [" + illInputs + "] not found.\n"
+                    + "Only searching for filters: [" + validInputs + "].";
+            notifier.firePropertyChange("illflt", null, message);
         }
     }
 
-    private List<Method> findMatchingMethodsFromCategories(Set<String> ctgrysFound, boolean isSubsetFlag) {
+    private List<Method> findMatchingMethodsFromFilters(Set<String> filtersFound, boolean isSubsetFlag) {
         
         List<Method> res;
         if (isSubsetFlag) {
             res = new ArrayList<Method>();
-            List<Set<String>> matches = ctgryToMethodMap.keySet().stream()
-                    .filter(c -> c.containsAll(ctgrysFound))
+            List<Set<String>> matches = filterToMethodMap.keySet().stream()
+                    .filter(c -> c.containsAll(filtersFound))
                     .collect(Collectors.toList());
-            matches.forEach(k -> ctgryToMethodMap.get(k).forEach(e -> res.add(e)));
+            matches.forEach(k -> filterToMethodMap.get(k).forEach(e -> res.add(e)));
         }
         else {
-            res = ctgryToMethodMap.get(ctgrysFound).stream().collect(Collectors.toList());
+            res = filterToMethodMap.get(filtersFound).stream().collect(Collectors.toList());
         }
 
         if (!res.isEmpty())
             return res;
-        notifier.firePropertyChange("404", null, "Methods under the specified category");
+        notifier.firePropertyChange("404", null, "Methods under the specified filter");
         return null;
     }
 }

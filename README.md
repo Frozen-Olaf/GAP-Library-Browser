@@ -1,5 +1,11 @@
 # GAP-Library-Browser
-## version: v0.1.1
+## version: v0.2.0 update:
+  * Now for searching, the browser searches by ***GAP filters***, instead of GAP categories from previous versions.
+  * Added web-style tabs and traverse buttons so that user can easily traverse across different search result pages.
+  * added a secondary search bar on search result page.
+  * Updated some GUI component and fixed some bugs.
+  
+------------------------------------------------------------------------------------------------------------------------------
 ### This project is a tool to browse the libraries and packages of the GAP system.
 ### It consists of two parts: 
 ###  1. Dumping of GAP (written in GAP language)
@@ -10,7 +16,7 @@
 
 This part of the project is implemented by a script 'dump.g' that dumps all the methods under all the operations currently availlable in GAP into a JSON file, covering information such as:
   * name of the method;
-  * categories to which arguments of the method belong;
+  * filters to which arguments of the method are applicable;
   * rank of the method;
   * file path to the source code file in which the method is implemented;
   * line number range in the source code file that includes the implementation of the method.
@@ -53,42 +59,45 @@ and it has not been tested on JDK < 11 yet.
 The searches that can be performed in the browser generally consist of the following three types:
 
 ####  1. search a GAP operation by name, returns all the methods under that operation.
-####  2. search a number of GAP categories, returns the methods whose arguments ***altogether*** are under the specified categories.
-####  3. search GAP methods by a combination of method name and specified categories of arguments applicable to that method.
+####  2. search a number of GAP filters, returns the methods whose arguments ***altogether*** are under the specified filters.
+####  3. search GAP methods by a combination of method name and specified filters of arguments applicable to that method.
   
 #### Note:
-By "***altogether***" in type 2, I mean the union set of all categories of all the arguments of a method.
+By "***altogether***" in type 2, I mean the union set of all filters of all the arguments of a method.
 
 ### Search Method (Type 3)
 Now, more specifically on type 3, the search input should be of the following formats:
 
-If you only want to search for methods under certain categories and by certain method name pattern:
-> method_name(category1, category2, category3, ...)
+If you only want to search for methods under certain filters and by certain method name pattern:
+> method_name(filter1, filter2, filter3, ...)
 
-If you would like to impose an order on the categories of arguments of the method for searching:
-> method_name([arg1_category1, ...], [arg2_category1, arg2_category2, arg2_category3], ...)
+If you would like to impose an order on the 
+
+
+ories of arguments of the method for searching:
+> method_name([arg1_filter1, ...], [arg2_filter1, arg2_filter2, arg2_filter3], ...)
 
 #### Note:
 Everthing in the search input should be separated by a comma ', '. 
 Whitespaces generally don't matter.
 
-When specifying the order of the categories of arguments of a method, as shown above, the content between the delimiters '[' and ']' represent categories for a argument of the method.
+When specifying the order of the filters of arguments of a method, as shown above, the content between the delimiters '[' and ']' represent filters for a argument of the method.
 
 
 ### Subset Symbol '...'
 As you may be wondering what the role of '...' is:
 
-If user enters '...' as (the ending) part of their input, then it specifies that the search results should be a superset of the user input. This is only applicable when user is searching categories or methods.
+If user enters '...' as (the ending) part of their input, then it specifies that the search results should be a superset of the user input. This is only applicable when user is searching filters or methods.
 
 For example: 
-When searching the categories: 
+When searching the filters: 
 > IsExtLElement, IsExtRElement, IsMultiplicativeElement, IsMultiplicativeElementWithOne 
 
-it will return all the methods whose arguments **altogether** belong to exactly these categories,
+it will return all the methods whose arguments **altogether** belong to exactly these filters,
 whereas when searching:
 > IsExtLElement, IsExtRElement, IsMultiplicativeElement, IsMultiplicativeElementWithOne, ...
 
-it will return all the methods whose arguments **altogether** at least belong to these categories.
+it will return all the methods whose arguments **altogether** at least belong to these filters.
     
 For searching method (type 3):
   1. This allows user to enter '...' at the end of input, separated priorly by a comma, to search for methods which take more arguments than the currently specified argument number, and based on the current imposed argument order.
@@ -96,26 +105,30 @@ For searching method (type 3):
 For instance, when searching
 > method_name([arg1_category1, arg1_category2], [arg2_category1, arg2_category2, arg2_category3], ...)
 
-it will return all the methods that match the name pattern, at least take two arguments, and at the same time, the first two arguments are of the categories exactly as specified by the user. Methods returned can take more than two arguments as long as the condition is met.
+it will return all the methods that match the name pattern, at least take two arguments, and at the same time, the first two arguments are of the filters exactly as specified by the user. Methods returned can take more than two arguments as long as the condition is met.
    
-  2. This allows user to specify that, for each argument of the method, whether they want to permit searching for methods that have a superset of categories at that exact argument position.
+  2. This allows user to specify that, for each argument of the method, whether they want to permit searching for methods that have a superset of filters at that exact argument position.
 
 For instance, when searching
 > method_name([arg1_category1, ...], [arg2_category1, ...])
 
-it will return all the methods that match the name pattern, take exactly two arguments, and at the same time, each of these two arguments is of a superset of the categories as specified by the user at that argument position.
+it will return all the methods that match the name pattern, take exactly two arguments, and at the same time, each of these two arguments is of a superset of the filters as specified by the user at that argument position.
    
   3. This also allows user to bypass arguments at certain positions of the method.
 
-For instance, to specify only the categories of the second argument of the method to search, and ignore the first argument and the third argument, one can do
+For instance, to specify only the filters of the second argument of the method to search, and ignore the first argument and the third argument, one can do
 > method_name([...], [arg2_category1, arg2_category2, arg2_category3, ...], [...], ...)
 
-it will return all the methods that match the name pattern, take at least three arguments, and at the same time, the second argument is of a superset of the categories as specified by the user.
+it will return all the methods that match the name pattern, take at least three arguments, and at the same time, the second argument is of a superset of the filters as specified by the user.
 
 
-### Empty Argument Symbol: \void
+------------------------------------------------------------------------------------------------------------------------------
+#### Warning:
+The following functionality is ***deprecated*** in version 0.2.0 and all upcoming versions, due to the switch from searching by only GAP categories to now by GAP filters.
+
+##### Empty Argument Symbol: \void
 To search for methods that take no arguments, there are two ways:
-  1. When searching category, enter as in the search input:
+  1. When searching filter, enter as in the search input:
 > \void
   2. When seatching method, enter
 > method_name(\void)

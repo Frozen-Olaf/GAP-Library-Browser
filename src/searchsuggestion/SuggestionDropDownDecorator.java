@@ -42,10 +42,11 @@ public class SuggestionDropDownDecorator<C extends JComponent> {
 	      popupMenu = new JPopupMenu();
 	      listModel = new DefaultListModel<>();
 	      listComp = new JList<>(listModel);
+	      listComp.setVisibleRowCount(20);
 	      listComp.setBorder(BorderFactory.createEmptyBorder(0, 2, 5, 2));
 	      listComp.setFocusable(false);
 	      popupMenu.setFocusable(false);
-	      popupMenu.add(listComp);
+	      popupMenu.add(new JScrollPane(listComp));
 	  }
 
 	  private void initSuggestionCompListener() {

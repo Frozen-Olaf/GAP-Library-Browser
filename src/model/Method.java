@@ -9,17 +9,17 @@ public class Method {
 	private String name;
 	private int rank;
 	
-	private String[][] argCategories;
+	private String[][] argFilters;
 	
 	private String filePath;
 	private int lineNumStart;
 	private int lineNumEnd;
 	
-	public Method(String name, String[][] argCategories, int rank, String filePath, int lineNumStart, int lineNumEnd) {
+	public Method(String name, String[][] argFilters, int rank, String filePath, int lineNumStart, int lineNumEnd) {
 		this.name = name;
 		this.rank = rank;
 		
-		this.argCategories = argCategories;
+		this.argFilters = argFilters;
 		
 		this.filePath = filePath;
 		this.lineNumStart = lineNumStart;
@@ -30,12 +30,12 @@ public class Method {
 		return name;
 	}
 	
-	public String[][] getArgCategories() {
-		return argCategories;
+	public String[][] getArgFilters() {
+		return argFilters;
 	}
 	
 	public int getArgNumber() {
-		return argCategories.length;
+		return argFilters.length;
 	}
 	
 	public int getRank() {
@@ -54,15 +54,15 @@ public class Method {
 		return lineNumEnd;
 	}
 	
-	public static Set<String> getUniqueCategories(String[][] argCategories){
-	    return Arrays.stream(argCategories)
+	public static Set<String> getUniqueFilters(String[][] argFilters){
+	    return Arrays.stream(argFilters)
 	            .flatMap(Arrays::stream)
 	            .collect(Collectors.toSet());
 	}
 	
-	public static String getCategoriesInOneLine(String[] argCtgrys) {
+	public static String getFiltersInOneLine(String[] argFilters) {
 		String res = "";
-		for (String elem : argCtgrys) {
+		for (String elem : argFilters) {
 			res += elem + ", ";
 		}
 		if (!res.isEmpty())
@@ -79,7 +79,7 @@ public class Method {
             return true;
         if (obj != null && obj.getClass() == this.getClass()) {
         	Method mthd = (Method) obj;
-            return (this.name.equals(mthd.getName()) && Arrays.deepEquals(this.argCategories, mthd.getArgCategories())
+            return (this.name.equals(mthd.getName()) && Arrays.deepEquals(this.argFilters, mthd.getArgFilters())
             		&& this.rank==mthd.getRank() && this.filePath.equals(mthd.getFilePath())
             		&& this.lineNumStart == mthd.lineNumStart && this.lineNumEnd == mthd.lineNumEnd);
         }
