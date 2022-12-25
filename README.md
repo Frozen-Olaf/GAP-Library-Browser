@@ -1,8 +1,12 @@
 # GAP-Library-Browser
 ## version: v0.2.0 update:
-  * Now for searching, the browser searches by ***GAP filters***, instead of GAP categories from previous versions.
+  * Now for searching methods through arguments, the browser searches by ***GAP filters***, instead of GAP categories from previous versions. This is under the consideration of including certain unique properties of some methods.
   * Added web-style tabs and traverse buttons so that user can easily traverse across different search result pages.
-  * added a secondary search bar on search result page.
+  * Added a secondary search bar on search result page.
+  * Added a filtering option in search result page that can filter out "trivial" methods for display. Trivial methods are: 
+    - system getters and setters
+    - system mutable setters
+    - default methods that do nothing, from method installation
   * Updated some GUI component and fixed some bugs.
   
 ------------------------------------------------------------------------------------------------------------------------------
@@ -103,21 +107,21 @@ For searching method (type 3):
   1. This allows user to enter '...' at the end of input, separated priorly by a comma, to search for methods which take more arguments than the currently specified argument number, and based on the current imposed argument order.
 
 For instance, when searching
-> method_name([arg1_category1, arg1_category2], [arg2_category1, arg2_category2, arg2_category3], ...)
+> method_name([arg1_filter1, arg1_filter2], [arg2_filter1, arg2_filter2, arg2_filter3], ...)
 
 it will return all the methods that match the name pattern, at least take two arguments, and at the same time, the first two arguments are of the filters exactly as specified by the user. Methods returned can take more than two arguments as long as the condition is met.
    
   2. This allows user to specify that, for each argument of the method, whether they want to permit searching for methods that have a superset of filters at that exact argument position.
 
 For instance, when searching
-> method_name([arg1_category1, ...], [arg2_category1, ...])
+> method_name([arg1_filter1, ...], [arg2_filter1, ...])
 
 it will return all the methods that match the name pattern, take exactly two arguments, and at the same time, each of these two arguments is of a superset of the filters as specified by the user at that argument position.
    
   3. This also allows user to bypass arguments at certain positions of the method.
 
 For instance, to specify only the filters of the second argument of the method to search, and ignore the first argument and the third argument, one can do
-> method_name([...], [arg2_category1, arg2_category2, arg2_category3, ...], [...], ...)
+> method_name([...], [arg2_filter1, arg2_filter2, arg2_filter3, ...], [...], ...)
 
 it will return all the methods that match the name pattern, take at least three arguments, and at the same time, the second argument is of a superset of the filters as specified by the user.
 
