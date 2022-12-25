@@ -7,7 +7,7 @@
     - system getters and setters
     - system mutable setters
     - default methods that do nothing, derived from method installation
-  * Updated some GUI component and fixed some bugs.
+  * Added the GAP icon in the browser, updated some GUI component and fixed some bugs.
   
 ------------------------------------------------------------------------------------------------------------------------------
 ### This project is a tool to browse the libraries and packages of the GAP system.
