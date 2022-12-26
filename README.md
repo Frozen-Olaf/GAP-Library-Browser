@@ -75,10 +75,7 @@ Now, more specifically on type 3, the search input should be of the following fo
 If you only want to search for methods under certain filters and by certain method name pattern:
 > method_name(filter1, filter2, filter3, ...)
 
-If you would like to impose an order on the 
-
-
-ories of arguments of the method for searching:
+If you would like to impose an order on the filters of the arguments of the method for searching:
 > method_name([arg1_filter1, ...], [arg2_filter1, arg2_filter2, arg2_filter3], ...)
 
 #### Note:
