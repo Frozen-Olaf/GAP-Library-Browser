@@ -12,11 +12,18 @@
 ------------------------------------------------------------------------------------------------------------------------------
 ### This project is a tool to browse the libraries and packages of the GAP system.
 ### It consists of two parts: 
-###  1. Dumping of GAP (written in GAP language)
-###  2. The Browser Software with GUI (written in Java)
+    1. Dumping of GAP (written in GAP language)
+    2. The Browser Software with GUI (written in Java)
+
+
+### The following page has more information on what the browser can do:
+* [Features](https://github.com/Frozen-Olaf/GAP-Library-Browser/wiki#welcome-to-the-gap-library-browser-wiki).
+
+### Note:
+The browser runs OK on linux or unix-based OS, however, on Windows, some functionality such as the display of a source code file path is compromised.
 
 ------------------------------------------------------------------------------------------------------------------------------
-## Dumping of GAP:
+# Dumping of GAP:
 
 This part of the project is implemented by a script 'dump.g' that dumps all the methods under all the operations currently availlable in GAP into a JSON file, covering information such as:
   * name of the method;
@@ -43,7 +50,7 @@ If nothing goes wrong :), then a JSON file under the name format 'dump-current_d
 Dumping so far has only been tested on GAP 4.12.0 & 4.12.1.
 
 ------------------------------------------------------------------------------------------------------------------------------
-## The Browser Software with GUI:
+# The Browser Software with GUI:
 
 This part of the project is the browser itself.
 It is managed and wrapped by [Apache Maven](https://maven.apache.org/index.html).
@@ -52,14 +59,13 @@ It can read the dumped JSON file, and allow user to perform searches within, and
 To compile and run the browser, simply in command line:
   1. cd to the directory of this project
   2. run the following command:
-> java -jar target/GAP_Library_Browser_v0.1.jar
+> java -jar target/GAP_Library_Browser_v0.2.0.jar
         
-#### Note:
-This project CANNOT run with Java JDK < 8 (not incl. 8), 
+### Note:
+This project CANNOT run with Java JDK < 8 (noninclusive), and it has not been tested on JDK < 11 yet.
 
-and it has not been tested on JDK < 11 yet.
-  
-### Search:
+***
+## Search:
 The searches that can be performed in the browser generally consist of the following three types:
 
 ####  1. search a GAP operation by name, returns all the methods under that operation.
@@ -67,7 +73,7 @@ The searches that can be performed in the browser generally consist of the follo
 ####  3. search GAP methods by a combination of method name and specified filters of arguments applicable to that method.
   
 #### Note:
-By "***altogether***" in type 2, I mean the union set of all filters of all the arguments of a method.
+By `altogether` in type 2, I mean the union set of all filters of all the arguments of a method.
 
 ### Search Method (Type 3)
 Now, more specifically on type 3, the search input should be of the following formats:
@@ -79,16 +85,12 @@ If you would like to impose an order on the filters of the arguments of the meth
 > method_name([arg1_filter1, ...], [arg2_filter1, arg2_filter2, arg2_filter3], ...)
 
 #### Note:
-Everthing in the search input should be separated by a comma ', '. 
-Whitespaces generally don't matter.
+* Everthing in the search input should be separated by a comma `, `.  Whitespaces generally don't matter.
+* When specifying the order of the filters of arguments of a method, as shown above, the content between the delimiters `[` and `]` represent filters for a argument of the method.
 
-When specifying the order of the filters of arguments of a method, as shown above, the content between the delimiters '[' and ']' represent filters for a argument of the method.
-
-
-### Subset Symbol '...'
-As you may be wondering what the role of '...' is:
-
-If user enters '...' as (the ending) part of their input, then it specifies that the search results should be a superset of the user input. This is only applicable when user is searching filters or methods.
+***
+### Subset Symbol `...`
+As you may be wondering what the role of `...` is: If user enters `...` as (the ending) part of their input, then it specifies that the search results should be a superset of the user input. This is only applicable when user is searching filters or methods.
 
 For example: 
 When searching the filters: 
@@ -100,8 +102,8 @@ whereas when searching:
 
 it will return all the methods whose arguments **altogether** at least belong to these filters.
     
-For searching method (type 3):
-  1. This allows user to enter '...' at the end of input, separated priorly by a comma, to search for methods which take more arguments than the currently specified argument number, and based on the current imposed argument order.
+#### For searching method (type 3):
+  1. This allows user to enter `...` at the end of input, separated priorly by a comma, to search for methods which take more arguments than the currently specified argument number, and based on the current imposed argument order.
 
 For instance, when searching
 > method_name([arg1_filter1, arg1_filter2], [arg2_filter1, arg2_filter2, arg2_filter3], ...)
