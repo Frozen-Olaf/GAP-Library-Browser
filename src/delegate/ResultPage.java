@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
@@ -69,8 +70,6 @@ public class ResultPage extends Page {
     private JTextArea fullText;
     private JScrollPane fullTextScroll;
     private JPanel fullTextPanel;
-
-    private JPanel contentPanel;
 
 	private int cursor = Cursor.DEFAULT_CURSOR;
 
@@ -133,7 +132,7 @@ public class ResultPage extends Page {
     
     private void initFilter() {
         filterPanel = new JPanel(new BorderLayout());
-        filter = new JLabel("Table filtering:");
+        filter = new JLabel("Table Filtering:");
         filter.setToolTipText("Filter the table by your input text");
         filterText = new JTextField();
         filterText.getDocument().addDocumentListener(
@@ -182,6 +181,24 @@ public class ResultPage extends Page {
         constructSearchBar(false);
     }
 
+    private void newTableFilter() {
+        RowFilter<Object, Object> rf = null;
+        //If current expression doesn't parse, don't update.
+        try {
+            rf = RowFilter.regexFilter(Pattern.quote(filterText.getText()));
+            prevRowFilter = rf;
+            if (cbHideTrivial.isSelected()) {
+                List<RowFilter<Object,Object>> fl = new ArrayList<>(2);
+                fl.add(nontrivialFilter);
+                fl.add(rf);
+                rf = RowFilter.andFilter(fl);
+            }
+            sorter.setRowFilter(rf);
+        } catch (java.util.regex.PatternSyntaxException e) {
+            return;
+        }
+    }
+
     private void setupHeaderLayout() {
         header.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -212,24 +229,6 @@ public class ResultPage extends Page {
         c.insets = new Insets(0,10,0,0);
         c.gridwidth = 1;
         header.add(searchBar, c);
-    }
-
-    private void newTableFilter() {
-        RowFilter<Object, Object> rf = null;
-        //If current expression doesn't parse, don't update.
-        try {
-            rf = RowFilter.regexFilter(filterText.getText());
-            prevRowFilter = rf;
-            if (cbHideTrivial.isSelected()) {
-                List<RowFilter<Object,Object>> fl = new ArrayList<>(2);
-                fl.add(nontrivialFilter);
-                fl.add(rf);
-                rf = RowFilter.andFilter(fl);
-            }
-            sorter.setRowFilter(rf);
-        } catch (java.util.regex.PatternSyntaxException e) {
-            return;
-        }
     }
     
 	private void initScrollableTable() {
@@ -303,6 +302,7 @@ public class ResultPage extends Page {
 		
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.setCellSelectionEnabled(true);
+		// Disable any content editing from the table.
     	table.setDefaultEditor(Object.class, null);
     }
 	
@@ -310,8 +310,11 @@ public class ResultPage extends Page {
 		table.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				if (table.getSelectedColumn()==tableColNum-2) {
-					String path = methods.get(table.getSelectedRow()).getFilePath();
+			    int selectedRow = table.getSelectedRow();
+			    int selectedCol = table.getSelectedColumn();
+                Object val = table.getValueAt(selectedRow, selectedCol);
+				if (selectedCol==tableColNum-2) {
+					String path = val.toString();
 					if (path.startsWith(".")) {
 						path = Model.getGapRootDir() + path.substring(2);
 					}
@@ -343,8 +346,8 @@ public class ResultPage extends Page {
                     }
 				}
 				
-				Object str = table.getValueAt(table.getSelectedRow(), table.getSelectedColumn());
-				updateFullTextDisplayer(str);
+
+				updateFullTextDisplayer(val);
 			}
 			@Override
 			public void mouseExited(MouseEvent e) {

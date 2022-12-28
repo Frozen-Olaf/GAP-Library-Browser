@@ -2,17 +2,21 @@ package searchsuggestion;
 
 import java.awt.Point;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import javax.swing.text.*;
 
 
 public class TextComponentWordSuggestionClient implements SuggestionClient<JTextComponent> {
 
-	private Function<String, List<String>> suggestionProvider;
+	private BiFunction<String, List<String>, List<String>> suggestionProvider;
+	private List<String> previousMethodList = new ArrayList<String>();
+	private int previousCaretPosition = 0;
+	private int earlierPreviousWordIndex = 0;
 
-	public TextComponentWordSuggestionClient(Function<String, List<String>> suggestionProvider) {
+	public TextComponentWordSuggestionClient(BiFunction<String, List<String>, List<String>> suggestionProvider) {
 		this.suggestionProvider = suggestionProvider;
 	}
 
@@ -49,12 +53,12 @@ public class TextComponentWordSuggestionClient implements SuggestionClient<JText
 		try {
 			int cp = tp.getCaretPosition();
 			if (cp != 0) {
-				String text = tp.getText(cp - 1, 1);
+				String text = tp.getText(cp-1, 1);
 				if (text.equals(",") || text.trim().isEmpty()) {
 					return null;
 				}
-				if (cp>1) {
-					text = tp.getText(cp - 2, 2);
+				if (cp > 1) {
+					text = tp.getText(cp-2, 2);
 					if (text.equals("..")) {
 						return null;
 					}
@@ -71,7 +75,18 @@ public class TextComponentWordSuggestionClient implements SuggestionClient<JText
 			}
 			int previousWordIndex = Utilities.getPreviousWord(tp, cp);
 			String text = tp.getText(previousWordIndex, cp - previousWordIndex);
-			return suggestionProvider.apply(text.trim());
+			
+			int cpDiff = cp - previousCaretPosition;
+			previousCaretPosition = cp;
+            if (cpDiff <= 0 || earlierPreviousWordIndex != previousWordIndex) {
+                // User is deleting some input, i.e., the caret position is decreasing.
+                previousMethodList.clear();
+            }
+            List<String> resultList = suggestionProvider.apply(text.trim(), previousMethodList);
+            previousMethodList = resultList;
+            earlierPreviousWordIndex = previousWordIndex;
+            return resultList;
+			
 		} catch (BadLocationException e) {}
 		return null;
 	}

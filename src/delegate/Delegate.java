@@ -55,6 +55,7 @@ public class Delegate implements PropertyChangeListener {
         //DO NOT add any component to JFrame before its layout is set, it won't display properly!!!
         frame.getContentPane().setLayout(new BorderLayout());
         frame.add(multiPages, BorderLayout.CENTER);
+        multiPages.setFrame(frame);
 
         frame.setSize(FRAME_WIDTH, FRAME_HEIGHT);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>GAP_Library_Browser</groupId>
   <artifactId>GAP_Library_Browser</artifactId>
-  <version>v0.2.0</version>
+  <version>v0.2.1</version>
   
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

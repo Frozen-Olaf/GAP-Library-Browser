@@ -120,7 +120,7 @@ public class ButtonTab extends JPanel{
             Component component = e.getComponent();
             if (component instanceof ButtonTab) {
                 ButtonTab tab = (ButtonTab) component;
-                Delegate.multiPages.changeToPage(tab.getTitle());
+                Delegate.multiPages.changeToPage(tab.getTitle(), false);
             }
         }
 

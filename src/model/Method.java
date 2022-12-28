@@ -69,19 +69,16 @@ public class Method {
 			return res.substring(0, res.lastIndexOf(','));
 		return res;
 	}
-
-	/**
-     * Overridden equals();
-     */
+	
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
         if (obj != null && obj.getClass() == this.getClass()) {
         	Method mthd = (Method) obj;
-            return (this.name.equals(mthd.getName()) && Arrays.deepEquals(this.argFilters, mthd.getArgFilters())
-            		&& this.rank==mthd.getRank() && this.filePath.equals(mthd.getFilePath())
-            		&& this.lineNumStart == mthd.lineNumStart && this.lineNumEnd == mthd.lineNumEnd);
+            return (name.equals(mthd.getName()) && Arrays.deepEquals(argFilters, mthd.getArgFilters())
+            		&& rank==mthd.getRank() && filePath.equals(mthd.getFilePath())
+            		&& lineNumStart == mthd.lineNumStart && lineNumEnd == mthd.lineNumEnd);
         }
         return false;
     }

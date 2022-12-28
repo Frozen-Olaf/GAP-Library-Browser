@@ -61,7 +61,7 @@ public abstract class Page extends JPanel {
         homeBtn.setOpaque(true);
         homeBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Delegate.multiPages.changeToPage("home");
+                Delegate.multiPages.changeToPage("home", false);
             }
         });
         homeBtn.addMouseListener(btnMouseCursorAdapter);
@@ -75,7 +75,7 @@ public abstract class Page extends JPanel {
         prevBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (prev != null) {
-                    Delegate.multiPages.changeToPage(prev);
+                    Delegate.multiPages.changeToPage(prev, false);
                 }
             }
         });
@@ -83,7 +83,7 @@ public abstract class Page extends JPanel {
         nextBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (next != null) {
-                    Delegate.multiPages.changeToPage(next);
+                    Delegate.multiPages.changeToPage(next, false);
                 }
             }
         });

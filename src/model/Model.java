@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -51,6 +52,10 @@ public class Model {
     private static final Set<String> filterSet = new HashSet<String>();
     private static final Set<Pair<String, Integer>> searchHistoySet = new LinkedHashSet<Pair<String, Integer>>();
     private static final Set<String> emptyFilterSet = new HashSet<String>();
+    
+    private static List<String> sortedOperationList;
+    private static List<Method> sortedMethodList;
+    private static List<String> sortedFilterList;
 
     private PropertyChangeSupport notifier;
 
@@ -85,19 +90,19 @@ public class Model {
     }
 
     public static List<String> getAllOperationsInList(){
-        return optnToMethodMap.keySet().stream().collect(Collectors.toList());
+        return sortedOperationList;
     }
 
     public static List<Method> getAllMethodsInList(){
-        return filterToMethodMap.values().stream().collect(Collectors.toList());
+        return sortedMethodList;
     }
 
     public static List<String> getAllFiltersInList(){
-        return filterSet.stream().collect(Collectors.toList());
+        return sortedFilterList;
     }
 
     public static List<String> getNonDuplicateSearchHisotryInList(int modelState) {
-        return searchHistoySet.stream().filter(sh -> sh.getValue()==modelState)
+        return searchHistoySet.stream().filter(sh -> sh.getValue() == modelState)
                 .map(Pair::getKey).collect(Collectors.toList());
     }
 
@@ -161,7 +166,6 @@ public class Model {
      * @throws IOException
      */
     public void readFromJson(File file) throws IOException {
-        
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line = br.readLine();
         try {
@@ -172,12 +176,15 @@ public class Model {
                 notifier.firePropertyChange("rtdir", null, rootDir.getCanonicalPath());
                 return;
             }
-            Model.GAP_ROOT_DIRECTORY = rootDirPath;
+            GAP_ROOT_DIRECTORY = rootDirPath;
             while ((line = br.readLine()) != null) {
                 readLineFromJson(line);
             }
             br.close();
             notifier.firePropertyChange("success", null, file.getCanonicalPath());
+            sortedOperationList = optnToMethodMap.keySet().stream().sorted().collect(Collectors.toList());
+            sortedMethodList = filterToMethodMap.values().stream().sorted(Comparator.comparing(Method::getName)).collect(Collectors.toList());
+            sortedFilterList = filterSet.stream().sorted().collect(Collectors.toList());
         } catch (IndexOutOfBoundsException | JSONException | NumberFormatException e) {
             br.close();
             notifier.firePropertyChange("illf", null, "Illegal content format in the JSON file loaded from:\n" + file.getCanonicalPath());
@@ -187,7 +194,6 @@ public class Model {
     }
 
     private void readLineFromJson(String line) throws JSONException, NumberFormatException {
-        
         JSONObject obj = new JSONObject(line);
         String optName;
         Set<String> fields = obj.keySet();
@@ -250,7 +256,6 @@ public class Model {
     }
 
     private int parseFractionToInteger(String str) throws NumberFormatException {
-        
         if (StringUtils.countMatches(str, '/')==1) {
             String[] nums = str.split("/");
             float res = Float.valueOf(nums[0])/Float.valueOf(nums[1]);
@@ -260,7 +265,6 @@ public class Model {
     }
 
     private String[] JSONArrayToStringArray(JSONArray jarr) {
-        
         String[] res = new String[jarr.length()];
         for(int i = 0; i < res.length; i++){
             res[i] = jarr.get(i).toString();
@@ -270,7 +274,6 @@ public class Model {
     
 
     public List<Method> searchOpt(String toSearch) {
-
         Set<Method> matches = optnToMethodMap.get(toSearch.trim());
         if (matches.size()!=0)
             return matches.stream().collect(Collectors.toList());
@@ -279,12 +282,10 @@ public class Model {
     }
 
     public List<Method> searchFilter(String toSearch) {
-        
         return searchByFilter(toSearch, checkSubsetFlag(toSearch, false));
     }
 
     private List<Method> searchByFilter(String input, boolean isSubsetFlag){
-        
         String[] filters = Arrays.stream(input.split(",")).map(String::trim).toArray(String[]::new);
         String last = filters[filters.length-1];
         if (filters.length == 1) {
@@ -317,11 +318,15 @@ public class Model {
      * @return
      */
     public List<Method> searchMethodWithFilter(String toSearch) {
-
-        String mthdName = StringUtils.substringBefore(toSearch, "(").trim();
-        if (mthdName.equals("..."))
-            return getAllMethodsInList();
-
+        String temp = StringUtils.substringBefore(toSearch, "(").trim();
+        boolean anyMethodNameFlag = temp.equals("...");
+        boolean methodNamePrefixFlag = true;
+        if (temp.startsWith("~")) {
+            methodNamePrefixFlag = false;
+            temp = temp.substring(1);
+        }
+        String mthdName = temp;
+        
         int indexFore = toSearch.indexOf('(');
         int indexBack= toSearch.lastIndexOf(')');
         if (mthdName.length()==0 || indexFore==-1 || indexBack==-1 || indexFore>indexBack) {
@@ -335,20 +340,31 @@ public class Model {
         boolean isOfArgOrderFlag = checkArgOrderFlag(filters);
         boolean isSubsetFlag = checkSubsetFlag(filters, isOfArgOrderFlag);
         if (isOfArgOrderFlag) {
-            return searchFilterOfArgumentOrder(mthdName, filters, isSubsetFlag);
+            return searchFilterOfArgumentOrder(mthdName, filters, anyMethodNameFlag, methodNamePrefixFlag, isSubsetFlag);
         }
         else {
             List<Method> ml = searchByFilter(filters, isSubsetFlag);
             if (ml == null) return null;
-
-            res = ml.stream().filter(mthd -> mthd.getName().contains(mthdName)).collect(Collectors.toList());
-            if (!res.isEmpty()) return res;
+            
+            if (anyMethodNameFlag) {
+                if (!ml.isEmpty())
+                    return ml;
+            } 
+            else {
+                if (methodNamePrefixFlag) {
+                    res = ml.stream().filter(mthd -> mthd.getName().startsWith(mthdName)).collect(Collectors.toList());
+                } 
+                else {
+                    res = ml.stream().filter(mthd -> mthd.getName().contains(mthdName)).collect(Collectors.toList());
+                }
+                if (!res.isEmpty()) return res;
+            }
             notifier.firePropertyChange("404", null, "Method with specified filters");
             return null;
         }
     }
 
-    private List<Method> searchFilterOfArgumentOrder(String mthdName, String filtersToSearch, boolean isArgNumSubsetFlag) {
+    private List<Method> searchFilterOfArgumentOrder(String mthdName, String filtersToSearch, boolean anyMethodNameFlag, boolean methodNamePrefixFlag, boolean isArgNumSubsetFlag) {
 
         String[] argFilters = StringUtils.substringsBetween(filtersToSearch, "[", "]");
         int argNum = argFilters.length;
@@ -378,19 +394,37 @@ public class Model {
         displayFiltersNotFound(filtersFound, filtersNotFound);
 
         List<Method> methodsMatchedFilters;
-        List<Method> methodsMatchedFiltersAndNames = new ArrayList<Method>();
+        List<Method> methodsMatchedFiltersAndNames;
         boolean isArgCtgrySubsetFlag = Booleans.contains(isSubsetFlags, true);
 
         methodsMatchedFilters = findMatchingMethodsFromFilters(filtersFound, (isArgNumSubsetFlag || isArgCtgrySubsetFlag));
-        if (methodsMatchedFilters==null) return null;
-        for (Method mthd : methodsMatchedFilters) {
-            if (mthd.getName().contains(mthdName)) {
-                if (mthd.getArgNumber()==argNum) {
-                    methodsMatchedFiltersAndNames.add(mthd);
+        if (methodsMatchedFilters == null) return null;
+
+        if (!anyMethodNameFlag) {
+            methodsMatchedFiltersAndNames = new ArrayList<Method>();
+            for (Method mthd : methodsMatchedFilters) {
+                if (methodNamePrefixFlag) {
+                    if (mthd.getName().startsWith(mthdName)) {
+                        if (mthd.getArgNumber() == argNum) {
+                            methodsMatchedFiltersAndNames.add(mthd);
+                        }
+                        else if (isArgNumSubsetFlag && mthd.getArgNumber()>argNum)
+                            methodsMatchedFiltersAndNames.add(mthd);
+                    }
+                } 
+                else {
+                    if (mthd.getName().contains(mthdName)) {
+                        if (mthd.getArgNumber() == argNum) {
+                            methodsMatchedFiltersAndNames.add(mthd);
+                        }
+                        else if (isArgNumSubsetFlag && mthd.getArgNumber()>argNum)
+                            methodsMatchedFiltersAndNames.add(mthd);
+                    }
                 }
-                else if (isArgNumSubsetFlag && mthd.getArgNumber()>argNum)
-                    methodsMatchedFiltersAndNames.add(mthd);
             }
+        }
+        else {
+            methodsMatchedFiltersAndNames = methodsMatchedFilters;
         }
         List<Method> res = new ArrayList<Method>();
         boolean isArgNameAndOrderMatch;
@@ -423,15 +457,13 @@ public class Model {
     }
 
     private boolean checkArgOrderFlag(String input) {
-
         int index = input.indexOf('[');
         if (index == -1) return false;
         return (index < input.indexOf(']'));
     }
 
 
-    private boolean checkSubsetFlag(String input, boolean isOfArgOrderFlag) {  
-        
+    private boolean checkSubsetFlag(String input, boolean isOfArgOrderFlag) {
         if (isOfArgOrderFlag) {
             String lastPart = input.substring(input.lastIndexOf(']')+1);
             int index = lastPart.indexOf(',');
@@ -449,7 +481,6 @@ public class Model {
     }
 
     private boolean findMatchingFilters(String[] filters, boolean isSubsetFlag, Set<String> filtersFound, List<String> filtersNotFound) {
-        
         for (int i=0; i<filters.length; i++) {
             if (isSubsetFlag && i==filters.length-1) break;
             if (filterSet.contains(filters[i])) {
@@ -463,7 +494,6 @@ public class Model {
     }
 
     private void displayFiltersNotFound(Set<String> filtersFound, List<String> filtersNotFound) {
-        
         if (!filtersNotFound.isEmpty()) {
             String illInputs = filtersNotFound.stream().collect(Collectors.joining(", "));
             String validInputs = filtersFound.stream().collect(Collectors.joining(", "));
@@ -474,7 +504,6 @@ public class Model {
     }
 
     private List<Method> findMatchingMethodsFromFilters(Set<String> filtersFound, boolean isSubsetFlag) {
-        
         List<Method> res;
         if (isSubsetFlag) {
             res = new ArrayList<Method>();

@@ -12,6 +12,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -97,38 +98,51 @@ public class SearchBar extends JPanel{
     	setupPrimaryLayout();
     }
 
-    private static List<String> newSearchSuggestion(String input) {
+    private static List<String> newSearchSuggestion(String input, List<String> list) {
+        if (list.isEmpty()) {
+            List<String> searchHistories = Model.getNonDuplicateSearchHisotryInList(Model.getModelState());
 
-        List<String> searchHistories = Model.getNonDuplicateSearchHisotryInList(Model.getModelState());
+            Set<String> orderedSuggestions = new LinkedHashSet<String>();
+            List<String> histories = searchHistories.stream()
+                    .filter(s -> s.startsWith(input))
+                    .limit(5)
+                    .collect(Collectors.toList());
+            orderedSuggestions.addAll(histories);
 
-    	Set<String> suggestions = searchHistories.stream()
-    			.filter(s -> s.startsWith(input))
-    			.limit(5)
-    			.collect(Collectors.toSet());
+            if (Model.getModelState() == Model.STATE_SEARCH_OPERATION) {
+                List<String> optns = Model.getAllOperationsInList();
+                if (optns != null) {
+                    List<String> filtered = optns.stream()
+                            .filter(c -> c.startsWith(input))
+                            .collect(Collectors.toList());
+                    orderedSuggestions.addAll(filtered);
+                }
+            }
+            else if (Model.getModelState() == Model.STATE_SEARCH_FILTER) {
+                List<String> filters = Model.getAllFiltersInList();
+                if (filters != null) {
+                    List<String> filtered = filters.stream()
+                            .filter(f -> f.startsWith(input))
+                            .collect(Collectors.toList());
+                    orderedSuggestions.addAll(filtered);
+                }
+            }
+            else if (Model.getModelState() == Model.STATE_SEARCH_METHOD) {
+                List<Method> methods = Model.getAllMethodsInList();
+                if (methods != null) {
+                    List<Method> filtered = methods.stream()
+                            .filter(m -> m.getName().startsWith(input))
+                            .collect(Collectors.toList());
+                    filtered.forEach(m -> orderedSuggestions.add(m.getName()));
+                }
+            }
 
-    	if (Model.getModelState() == Model.STATE_SEARCH_OPERATION) {
-    		List<String> optns = Model.getAllOperationsInList();
-    		List<String> filtered = optns.stream()
-    				.filter(c -> c.startsWith(input))
-    				.collect(Collectors.toList());
-    		suggestions.addAll(filtered);
-    	}
-    	else if (Model.getModelState() == Model.STATE_SEARCH_FILTER) {
-    		List<String> ctgrys = Model.getAllFiltersInList();
-    		List<String> filtered = ctgrys.stream()
-    				.filter(c -> c.startsWith(input))
-    				.collect(Collectors.toList());
-    		suggestions.addAll(filtered);
-    	}
-    	else if (Model.getModelState() == Model.STATE_SEARCH_METHOD) {
-    		List<Method> methods = Model.getAllMethodsInList();
-    		List<Method> filtered = methods.stream()
-    				.filter(m -> m.getName().startsWith(input))
-    				.collect(Collectors.toList());
-    		filtered.forEach(m -> suggestions.add(m.getName()));
-    	}
-
-    	return suggestions.stream().collect(Collectors.toList());
+            return orderedSuggestions.stream().collect(Collectors.toList());
+        }
+        else {
+            int lastCharIndex = input.length()-1;
+            return list.stream().filter(s -> (s.length()>lastCharIndex) && (s.charAt(lastCharIndex)==input.charAt(lastCharIndex))).collect(Collectors.toList());
+        }
     }
 
     private void initSearchButton() {
@@ -164,7 +178,7 @@ public class SearchBar extends JPanel{
     	String toSearch = searchInput.getText().trim();
     	
     	if (Model.getSearchHisotryInSet().contains(new ImmutablePair<String, Integer>(toSearch, modelState))) {
-    		if (Delegate.multiPages.changeToPage(toSearch))
+    		if (Delegate.multiPages.changeToPage(toSearch, true))
     		    return;
     	}
 
@@ -193,7 +207,7 @@ public class SearchBar extends JPanel{
 			} 
 			else return;
 			if (res!=null && p!=null) {
-			    Delegate.multiPages.changeToPage(p);
+			    Delegate.multiPages.changeToPage(p, true);
 			    page.next = p;
 			    p.prev = page;
                 Model.getSearchHisotryInSet().add(new ImmutablePair<String, Integer>(toSearch, modelState));

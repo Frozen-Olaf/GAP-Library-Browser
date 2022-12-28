@@ -46,6 +46,7 @@ public class SuggestionDropDownDecorator<C extends JComponent> {
 	      listComp.setBorder(BorderFactory.createEmptyBorder(0, 2, 5, 2));
 	      listComp.setFocusable(false);
 	      popupMenu.setFocusable(false);
+	      // Make the search suggestion list scrollable.
 	      popupMenu.add(new JScrollPane(listComp));
 	  }
 
@@ -151,7 +152,10 @@ public class SuggestionDropDownDecorator<C extends JComponent> {
 	      if (popupMenu.isVisible() && listModel.getSize() > 0) {
 	          int selectedIndex = listComp.getSelectedIndex();
 	          if (selectedIndex < listModel.getSize()) {
-	              listComp.setSelectedIndex(selectedIndex + 1);
+	              int newSelectedIndex = selectedIndex + 1;
+	              listComp.setSelectedIndex(newSelectedIndex);
+	              // Make the selected search suggestion always visible
+                  listComp.ensureIndexIsVisible(newSelectedIndex);
 	              keyEvent.consume();
 	          }
 	      }
@@ -161,7 +165,10 @@ public class SuggestionDropDownDecorator<C extends JComponent> {
 	      if (popupMenu.isVisible() && listModel.getSize() > 0) {
 	          int selectedIndex = listComp.getSelectedIndex();
 	          if (selectedIndex > 0) {
-	              listComp.setSelectedIndex(selectedIndex - 1);
+	              int newSelectedIndex = selectedIndex - 1;
+	              listComp.setSelectedIndex(newSelectedIndex);
+	              // Make the selected search suggestion always visible
+                  listComp.ensureIndexIsVisible(newSelectedIndex);
 	              keyEvent.consume();
 	          }
 	      }
