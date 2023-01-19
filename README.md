@@ -34,7 +34,7 @@ To load a pkg into a running GAP session, one can use the command:
 
 After you make sure the two required packages are loaded onto your GAP session,
 to run the dumping, use the command: 
-> Read("file_path_to_dump.g");
+> Read("/file/path/to/dump.g");
 
 If nothing goes wrong :), then a JSON file under the name format 'dump-current_datetime.json' will be created, which contains all the dumped information!
 
