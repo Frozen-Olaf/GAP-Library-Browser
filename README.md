@@ -1,11 +1,6 @@
 # GAP-Library-Browser
-## version: v0.2.1 update:
-  * Added an option for the user, so that when searching methods they can specify whether they'd like the methods from the search results to have names containing the input method name or starting with its pattern.
-  * Optimised that in both search input suggestion list and search result table, content will be displayed in an ordered manner.
-  * Improved efficiency for fetching search input suggestions.
-  * Handled special character escaping in regular expresson.
-  * Fixed some minor bugs or undesired behaviours.
-  
+## version: v1.0.0
+
 ------------------------------------------------------------------------------------------------------------------------------
 ### This project is a tool to browse the libraries and packages of the GAP system.
 ### It consists of two parts: 
@@ -19,7 +14,7 @@
 ### Note:
 The browser runs OK on linux or unix-based OS, however, on Windows, some functionality such as the display of a source code file path is compromised.
 
-------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
 # Dumping of GAP:
 
 This part of the project is implemented by a script 'dump.g' that dumps all the methods under all the operations currently availlable in GAP into a JSON file, covering information such as:
@@ -46,7 +41,7 @@ If nothing goes wrong :), then a JSON file under the name format 'dump-current_d
 #### Note:
 Dumping so far has only been tested on GAP 4.12.0 & 4.12.1.
 
-------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
 # The Browser Software with GUI:
 
 This part of the project is the browser itself.
@@ -55,8 +50,8 @@ It can read the dumped JSON file, and allow user to perform searches within, and
 
 To compile and run the browser, simply in command line:
   1. cd to the directory of this project
-  2. run the following command:
-> java -jar target/GAP_Library_Browser_v0.2.1.jar
+  2. run the following command (specify the optional argument 'dark' if you would like to start the browser in dark mode):
+> java -jar target/GAP_Library_Browser_v1.0.0.jar [dark]
         
 ### Note:
 This project CANNOT run with Java JDK < 8 (noninclusive), and it has not been tested on JDK < 11 yet.
