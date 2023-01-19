@@ -58,3 +58,15 @@ This project CANNOT run with Java JDK < 8 (noninclusive), and it has not been te
 ***
 
 # Hope you have fun with this browser! :)
+
+## This project acknowledges the following icons:
+* <a href="https://www.flaticon.com/free-icons/home-button" title="home button icons">Home button icons created by bqlqn - Flaticon</a>
+* <a href="https://www.flaticon.com/free-icons/back" title="back icons">Back icons created by Handicon - Flaticon</a>
+* <a href="https://www.flaticon.com/free-icons/arrow" title="arrow icons">Arrow icons created by Handicon - Flaticon</a>
+* <a href="https://www.flaticon.com/free-icons/typing" title="typing icons">Typing icons created by Prashanth Rapolu 15 - Flaticon</a>
+* <a href="https://www.flaticon.com/free-icons/clear" title="clear icons">Clear icons created by The Icon Tree - Flaticon</a>
+* <a href="https://www.flaticon.com/free-icons/search-bar" title="search bar icons">Search bar icons created by Tanah Basah - Flaticon</a>
+* <a href="https://www.flaticon.com/free-icons/delete" title="delete icons">Delete icons created by Kiranshastry - Flaticon</a>
+* <a href="https://www.flaticon.com/free-icons/filter" title="filter icons">Filter icons created by joalfa - Flaticon</a>
+* <a href="https://www.flaticon.com/free-icons/sun" title="sun icons">Sun icons created by Freepik - Flaticon</a>
+* <a href="https://www.flaticon.com/free-icons/moon" title="moon icons">Moon icons created by Freepik - Flaticon</a>
