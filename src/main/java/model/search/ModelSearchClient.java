@@ -161,7 +161,7 @@ public class ModelSearchClient implements SearchClient {
      */
     @Override
     public List<Method> searchMethodByNameAndFilters(String toSearch) {
-        String tempMthdName = StringUtils.substringBeforeLast(toSearch, "(").trim();
+        String tempMthdName = StringUtils.substringBeforeLast(toSearch, "{").trim();
         boolean anyMethodNameFlag = tempMthdName.equals("...");
         boolean methodNamePrefixFlag = true;
         if (tempMthdName.startsWith("~")) {
@@ -173,8 +173,8 @@ public class ModelSearchClient implements SearchClient {
         // final.
         String mthdName = tempMthdName;
 
-        int indexFore = toSearch.lastIndexOf('(');
-        int indexBack = toSearch.lastIndexOf(')');
+        int indexFore = toSearch.lastIndexOf('{');
+        int indexBack = toSearch.lastIndexOf('}');
         // illegal input format, if method name is not recognised, ( or ) is not found
         // or found to be misplaced, or ) is not the last non-whitespace element of
         // input.
@@ -182,8 +182,8 @@ public class ModelSearchClient implements SearchClient {
                 || indexBack < toSearch.length() - 1) {
             notifier.firePropertyChange("illf", null,
                     "Unsupported input format for searching the method " + toSearch + "\n"
-                            + "try: method_name(filter1, filter2, ...)\n"
-                            + "or, method_name([arg1_flt1, arg1_flt2, ...], [arg2_flt1, ...], ...)");
+                            + "try: method_name{filter1, filter2, ...}\n"
+                            + "or, method_name{[arg1_flt1, arg1_flt2, ...], [arg2_flt1, ...], ...}");
             return null;
         }
         String filters = toSearch.substring(indexFore + 1, indexBack).trim();

@@ -89,7 +89,7 @@ public class MethodSearchInputPane extends JPanel {
     }
 
     public String getAllArgumentsInStandardInputFormat() {
-        String stdFormat = "(";
+        String stdFormat = "{";
         List<Pair<String, Boolean>> argInfos = getAllArgumentInfo();
         int validArgCount = argInfos.size();
         for (int i = 0; i < validArgCount; i++) {
@@ -114,7 +114,7 @@ public class MethodSearchInputPane extends JPanel {
                 break;
             stdFormat += ", ";
         }
-        stdFormat += ")";
+        stdFormat += "}";
         return stdFormat;
     }
 
