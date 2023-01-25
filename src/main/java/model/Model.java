@@ -34,6 +34,7 @@ public class Model {
         notifier.addPropertyChangeListener("newrtdir", listener);
         notifier.addPropertyChangeListener("illflt", listener);
         notifier.addPropertyChangeListener("success", listener);
+        notifier.addPropertyChangeListener("save", listener);
     }
 
     public ModelData getModelData() {

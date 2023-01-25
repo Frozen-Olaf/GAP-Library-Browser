@@ -2,8 +2,10 @@ package model.data;
 
 import java.beans.PropertyChangeSupport;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -85,7 +87,7 @@ public class ModelData {
     public String getOperationType(String optnName) {
         return optnTypeMap.get(optnName);
     }
-    
+
     public String codeContentOf(String filePath) throws IOException {
         File file = new File(filePath);
         BufferedReader br = new BufferedReader(new FileReader(file));
@@ -94,9 +96,17 @@ public class ModelData {
         return codeContent;
     }
 
+    public void saveFile(String pathToFile, String content) throws IOException {
+        BufferedWriter bw = new BufferedWriter(new FileWriter(pathToFile));
+        bw.write(content);
+        bw.close();
+        notifier.firePropertyChange("save", null, pathToFile);
+    }
+
     /**
-     * The argument file must start with the GAP rtdir as its first line, and the
-     * dumped content (dense) follows. No other file format than JSON is permitted.
+     * The argument file must start with the GAP root directory as its first line,
+     * and the dumped content (dense) follows. No other file format than JSON is
+     * permitted.
      * 
      * @param file
      * @return

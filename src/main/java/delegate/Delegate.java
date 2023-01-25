@@ -70,7 +70,13 @@ public class Delegate implements PropertyChangeListener {
                             "Successfully loaded the dump file from:\n" + evt.getNewValue());
                 }
             });
+        } else if (propertyName == "save") {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    JOptionPane.showMessageDialog(frame,
+                            "Successfully saved to:\n" + evt.getNewValue());
+                }
+            });
         }
-
     }
 }

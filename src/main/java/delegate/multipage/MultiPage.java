@@ -49,6 +49,10 @@ public class MultiPage extends JPanel implements PropertyChangeListener {
         });
         add(tabs, BorderLayout.CENTER);
     }
+    
+    public Component getCurrentPage() {
+        return tabs.getSelectedComponent();
+    }
 
     public void addPage(String pageName, Component page) {
         tabs.addTab(pageName, page);

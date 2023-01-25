@@ -65,6 +65,10 @@ public class CodePage extends Page {
         init();
         setName(name);
     }
+    
+    public String getCodeTextContent() {
+        return (codeText != null) ? codeText.getText() : null;
+    }
 
     private void init() {
         contentPanel = new JPanel(new BorderLayout());
@@ -200,17 +204,29 @@ public class CodePage extends Page {
         codeText.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                isEdited = true;
+                fileEditStateUpdate();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                isEdited = true;
+                fileEditStateUpdate();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                isEdited = true;
+                fileEditStateUpdate();
+            }
+            
+            private void fileEditStateUpdate() {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        isEdited = codeText.canUndo();
+                        if (isEdited && !info.getText().endsWith("*"))
+                            info.setText(info.getText() + "*");
+                        else if (!isEdited && info.getText().endsWith("*"))
+                            info.setText(info.getText().substring(0, info.getText().length() - 1));
+                    }
+                });
             }
         });
         codeText.addFocusListener(new FocusListener() {
