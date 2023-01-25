@@ -1,5 +1,6 @@
 # GAP-Library-Browser
-## version: v1.0.0
+## version: v1.0.1
+* Allows user to save an edited file to a new file.
 
 ------------------------------------------------------------------------------------------------------------------------------
 ### This project is a tool to browse the libraries and packages of the GAP system.
