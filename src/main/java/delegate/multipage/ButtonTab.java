@@ -28,7 +28,7 @@ public class ButtonTab extends JPanel {
 
     private final JTabbedPane tabs;
     private final Icon icon;
-    private final String title;
+    private String title;
 
     private JLabel ic;
     private JLabel textLabel;
@@ -45,6 +45,12 @@ public class ButtonTab extends JPanel {
 
     public String getTitle() {
         return title;
+    }
+    
+    public void updateTabName(String name) {
+        title = name.substring(name.lastIndexOf("/")+1);
+        setToolTipText(name);
+        textLabel.setText(title);
     }
 
     private void init() {

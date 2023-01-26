@@ -154,7 +154,7 @@ public class CustomTable extends JTable {
                     String name = path + "@" + codeRange;
                     if (!UserInterface.getMultiPage().changeToPage(name, false)) {
                         CodePage p = new CodePage(userInterface, model, name);
-                        UserInterface.getMultiPage().addPage(name, p);
+                        UserInterface.getMultiPage().addPage(p.getName(), p);
                         UserInterface.getMultiPage().changeToPage(p, false);
                         page.setNext(p);
                         p.setPrev(page);
@@ -196,7 +196,6 @@ public class CustomTable extends JTable {
         });
 
         addMouseMotionListener(new MouseMotionAdapter() {
-
             @Override
             public void mouseMoved(MouseEvent e) {
                 Point pt = e.getPoint();

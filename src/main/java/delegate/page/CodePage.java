@@ -45,6 +45,10 @@ public class CodePage extends Page {
     private static final Color LIGHT_LINE_HIGHLIGHT_COLOR = Color.decode("#f0f4fc");
     private static final Color DARK_LINE_HIGHLIGHT_COLOR = Color.decode("#38343c");
 
+    private static int newEmptyCodePageCount = 0;
+
+    private final boolean isNewEmptyCodePage;
+
     private final String filePath;
     private final Integer[] codeRange;
     private JPanel headerTop;
@@ -59,15 +63,44 @@ public class CodePage extends Page {
 
     public CodePage(UserInterface userInterface, Model model, String name) {
         super(userInterface, model);
+        isNewEmptyCodePage = false;
         String[] info = name.split("@");
         filePath = info[0];
         codeRange = Arrays.stream(info[1].split("-")).map(Integer::parseInt).toArray(Integer[]::new);
         init();
-        setName(name);
+        setName(name.substring(name.lastIndexOf("/") + 1));
     }
-    
+
+    public CodePage(UserInterface userInterface, Model model) {
+        super(userInterface, model);
+        isNewEmptyCodePage = true;
+        filePath = "Untitled" + ++newEmptyCodePageCount;
+        codeRange = null;
+        init();
+        setName(filePath);
+    }
+
+    public RSyntaxTextArea getCodeTextArea() {
+        return codeText;
+    }
+
+    public static int getNewEmptyCodePageCount() {
+        return newEmptyCodePageCount;
+    }
+
+    public static void decreaseNewEmptyCodePageCount() {
+        newEmptyCodePageCount--;
+    }
+
     public String getCodeTextContent() {
         return (codeText != null) ? codeText.getText() : null;
+    }
+
+    public void updateFileInfoDisplay(String filePath) {
+        setName(filePath.substring(filePath.lastIndexOf("/") + 1));
+        info.setText(filePath);
+        info.setToolTipText(filePath);
+        codeText.discardAllEdits();
     }
 
     private void init() {
@@ -150,19 +183,48 @@ public class CodePage extends Page {
     }
 
     private void initCodeContentDisplayer() {
-        String content;
-        try {
-            content = model.getModelData().codeContentOf(filePath);
-        } catch (IOException ioe) {
-            JOptionPane.showMessageDialog(frame, ioe.getMessage() + " ;(");
-            return;
-        }
-        codeText = new RSyntaxTextArea(content);
-        codeText.discardAllEdits();
+        codeText = new RSyntaxTextArea();
         codeText.setForeground(UIManager.getColor("TextArea.foreground"));
         codeText.setBackground(UIManager.getColor("TextArea.background"));
         codeText.setSelectionColor(UIManager.getColor("TextArea.selectionBackground"));
         codeText.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
+        codeText.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+
+        Color lineHighlightColor = UserInterface.getIsInDarkTheme() ? DARK_LINE_HIGHLIGHT_COLOR
+                : LIGHT_LINE_HIGHLIGHT_COLOR;
+        codeText.setCurrentLineHighlightColor(lineHighlightColor);
+        if (!isNewEmptyCodePage) {
+            initCodeContentAndHighlight();
+        }
+
+        codeText.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                fileEditStateUpdate();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                fileEditStateUpdate();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                fileEditStateUpdate();
+            }
+
+            private void fileEditStateUpdate() {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        isEdited = codeText.canUndo();
+                        if (isEdited && !info.getText().endsWith("*"))
+                            info.setText(info.getText() + "*");
+                        else if (!isEdited && info.getText().endsWith("*"))
+                            info.setText(info.getText().substring(0, info.getText().length() - 1));
+                    }
+                });
+            }
+        });
 
         LineNumberList lineNumberBar = new LineNumberList(codeText) {
             @Override
@@ -176,9 +238,23 @@ public class CodePage extends Page {
             private static final long serialVersionUID = 1L;
         };
 
-        Color lineHighlightColor = UserInterface.getIsInDarkTheme() ? DARK_LINE_HIGHLIGHT_COLOR
-                : LIGHT_LINE_HIGHLIGHT_COLOR;
-        codeText.setCurrentLineHighlightColor(lineHighlightColor);
+        sp = new RTextScrollPane(codeText);
+        sp.setRowHeaderView(lineNumberBar);
+        sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        sp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        sp.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+    }
+
+    private void initCodeContentAndHighlight() {
+        String content;
+        try {
+            content = model.getModelData().codeContentOf(filePath);
+        } catch (IOException ioe) {
+            JOptionPane.showMessageDialog(frame, ioe.getMessage() + " ;(");
+            return;
+        }
+        codeText.setText(content);
+        codeText.discardAllEdits();
 
         int startPos = 0;
         for (int i = 0; i < codeRange[1]; i++) {
@@ -200,35 +276,7 @@ public class CodePage extends Page {
                     new DefaultHighlighter.DefaultHighlightPainter(UIManager.getColor("TextArea.selectionBackground")));
         } catch (BadLocationException e) {
         }
-
-        codeText.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                fileEditStateUpdate();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                fileEditStateUpdate();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                fileEditStateUpdate();
-            }
-            
-            private void fileEditStateUpdate() {
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        isEdited = codeText.canUndo();
-                        if (isEdited && !info.getText().endsWith("*"))
-                            info.setText(info.getText() + "*");
-                        else if (!isEdited && info.getText().endsWith("*"))
-                            info.setText(info.getText().substring(0, info.getText().length() - 1));
-                    }
-                });
-            }
-        });
+        
         codeText.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -252,12 +300,6 @@ public class CodePage extends Page {
                 }
             }
         });
-
-        sp = new RTextScrollPane(codeText);
-        sp.setRowHeaderView(lineNumberBar);
-        sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        sp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        sp.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
     }
 
     @Override
@@ -279,16 +321,17 @@ public class CodePage extends Page {
                         header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.decode("#363636")));
                         codeText.setCurrentLineHighlightColor(DARK_LINE_HIGHLIGHT_COLOR);
                     }
-
-                    if (!isEdited && highlightOn) {
-                        Highlighter hl = codeText.getHighlighter();
-                        hl.removeAllHighlights();
-                        try {
-                            hl.addHighlight(codeText.getLineStartOffset(codeRange[0] - 1),
-                                    codeText.getLineEndOffset(codeRange[1] - 1),
-                                    new DefaultHighlighter.DefaultHighlightPainter(
-                                            UIManager.getColor("TextArea.selectionBackground")));
-                        } catch (BadLocationException e) {
+                    if (!isNewEmptyCodePage) {
+                        if (!isEdited && highlightOn) {
+                            Highlighter hl = codeText.getHighlighter();
+                            hl.removeAllHighlights();
+                            try {
+                                hl.addHighlight(codeText.getLineStartOffset(codeRange[0] - 1),
+                                        codeText.getLineEndOffset(codeRange[1] - 1),
+                                        new DefaultHighlighter.DefaultHighlightPainter(
+                                                UIManager.getColor("TextArea.selectionBackground")));
+                            } catch (BadLocationException e) {
+                            }
                         }
                     }
                 }

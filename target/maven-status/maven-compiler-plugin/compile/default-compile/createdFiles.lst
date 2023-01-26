@@ -1,3 +1,4 @@
+delegate/page/CodePage$3$1.class
 delegate/searchbar/SearchBar$2.class
 delegate/page/Page$2.class
 delegate/Delegate$4.class
@@ -20,7 +21,6 @@ delegate/page/CodePage$6.class
 delegate/page/SearchResultPage$1.class
 delegate/table/CustomTable$CustomTableCellRenderer.class
 delegate/table/CustomTable$1.class
-delegate/page/CodePage$4$1.class
 delegate/multipage/ButtonTab$TabCloseButton$1.class
 delegate/searchbar/SearchBar$4.class
 model/searchsuggestion/SuggestionDropDownDecorator$2.class
@@ -30,9 +30,11 @@ delegate/page/SearchResultPage$8.class
 delegate/UserInterface$5.class
 delegate/page/CodePage$3.class
 delegate/UserInterface$2$1.class
+delegate/UserInterface$6$1.class
 delegate/multipage/MultiPage.class
 model/searchsuggestion/SuggestionDropDownDecorator$CustomListCellRenderer.class
 delegate/multipage/MultiPage$3.class
+delegate/UserInterface$6.class
 delegate/page/HomePage.class
 delegate/page/SearchResultPage$2.class
 model/search/ModelSearchClient.class

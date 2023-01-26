@@ -2,24 +2,24 @@ package search;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+//import java.io.BufferedReader;
+//import java.io.File;
+//import java.io.FileReader;
+//import java.io.IOException;
+//import java.net.URI;
+//import java.net.URISyntaxException;
+//import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.json.JSONArray;
+//import org.json.JSONArray;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import model.data.Method;
-import model.data.ModelData;
+//import model.data.ModelData;
 
 @DisplayName("JUnit 5 Test")
 class SearchFilterTest extends BaseTest {
@@ -42,6 +42,7 @@ class SearchFilterTest extends BaseTest {
                 "HasIsMonoidAsSemigroup", "IsOrthodoxSemigroup", "HasIsOrthodoxSemigroup", "CanComputeSizeAnySubgroup",
                 "KnowsHowToDecompose", "HasKnowsHowToDecompose", "IsSolvableGroup", "HasIsSolvableGroup",
                 "IsPolycyclicGroup", "HasIsPolycyclicGroup", "CategoryCollections(IsPcpElement)", "IsObject" };
+
         String[][] filters2 = {
                 { "IsListOrCollection", "IsCollection", "CanComputeSize", "IsDuplicateFree", "HasIsDuplicateFree",
                         "IsExtLElement", "CategoryCollections(IsExtLElement)", "IsExtRElement",

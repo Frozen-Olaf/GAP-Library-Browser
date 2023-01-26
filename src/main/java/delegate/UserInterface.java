@@ -15,6 +15,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -44,7 +45,6 @@ public class UserInterface {
 
     private JMenuBar menu;
     private JFileChooser fileChooser;
-    private FileNameExtensionFilter jsonFilter;
 
     private static MultiPage multiPage;
     private HomePage homePage;
@@ -127,17 +127,13 @@ public class UserInterface {
         };
 
         JMenu file = new JMenu("File");
-        file.addChangeListener(cl);
-        JMenuItem load = new JMenuItem("Load");
-        JMenuItem save = new JMenuItem("Save");
-        file.add(load);
-        file.add(save);
         // This is to avoid an undesired behaviour where when menu loses focus,
         // it returns the focus to the previous focus owner for a very short time.
-        menu.add(file);
+        file.addChangeListener(cl);
 
         fileChooser = new JFileChooser();
-        jsonFilter = new FileNameExtensionFilter("JSON files", "json");
+        FileNameExtensionFilter jsonFilter = new FileNameExtensionFilter("JSON files", "json");
+        JMenuItem load = new JMenuItem("Load");
         load.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -161,7 +157,10 @@ public class UserInterface {
                 }
             }
         });
+        load.setAccelerator(KeyStroke.getKeyStroke("control L"));
+        file.add(load);
 
+        JMenuItem save = new JMenuItem("Save");
         save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -181,7 +180,7 @@ public class UserInterface {
                         CodePage codePage = (CodePage) comp;
 
                         String fileName;
-                        String pathToFile;
+                        String filePath;
                         File file;
                         while (true) {
                             fileName = JOptionPane.showInputDialog(frame,
@@ -192,20 +191,20 @@ public class UserInterface {
                                 JOptionPane.showMessageDialog(frame, "Please enter a valid file name");
                                 continue;
                             }
-                            pathToFile = dir.getAbsolutePath() + "/" + fileName;
-                            file = new File(pathToFile);
+                            filePath = dir.getAbsolutePath() + "/" + fileName;
+                            file = new File(filePath);
                             if (file.exists()) {
                                 int choice = JOptionPane.showConfirmDialog(frame,
                                         "The file already exists in that directory. Do you want to override it?");
                                 if (choice == JOptionPane.YES_OPTION) {
-                                    notifyModelToSaveFile(codePage, pathToFile);
+                                    saveToFileFromCodePage(codePage, filePath);
                                     break;
                                 } else if (choice == JOptionPane.NO_OPTION) {
                                     continue;
                                 } else
                                     return;
                             } else {
-                                notifyModelToSaveFile(codePage, pathToFile);
+                                saveToFileFromCodePage(codePage, filePath);
                                 return;
                             }
                         }
@@ -215,8 +214,12 @@ public class UserInterface {
                 }
             }
         });
+        save.setAccelerator(KeyStroke.getKeyStroke("control S"));
+        file.add(save);        
+        menu.add(file);
 
         JMenu display = new JMenu("Display");
+        display.addChangeListener(cl);
         JMenu theme = new JMenu("Theme");
         theme.addChangeListener(cl);
         JMenuItem lightTheme = new JMenuItem("Light theme");
@@ -224,7 +227,6 @@ public class UserInterface {
         theme.add(lightTheme);
         theme.add(darkTheme);
         display.add(theme);
-        menu.add(display);
         lightTheme.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -245,15 +247,40 @@ public class UserInterface {
                 });
             }
         });
+        lightTheme.setAccelerator(KeyStroke.getKeyStroke("control shift L"));
+        darkTheme.setAccelerator(KeyStroke.getKeyStroke("control shift D"));
+        menu.add(display);
+        
+        JMenu page = new JMenu("Page");
+        page.addChangeListener(cl);
+        JMenuItem newCodePage = new JMenuItem("New code page");
+        newCodePage.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        CodePage p = new CodePage(UserInterface.this, model);
+                        UserInterface.getMultiPage().addPage(p.getName(), p);
+                        UserInterface.getMultiPage().changeToPage(p, false);
+                        p.getCodeTextArea().requestFocusInWindow();
+                    }
+                });
+            }
+        });
+        newCodePage.setAccelerator(KeyStroke.getKeyStroke("control N"));
+        page.add(newCodePage);
+        menu.add(page);
 
         frame.setJMenuBar(menu);
     }
 
-    private void notifyModelToSaveFile(CodePage codePage, String pathToFile) {
+    private void saveToFileFromCodePage(CodePage codePage, String filePath) {
         String text = codePage.getCodeTextContent();
         if (text != null) {
             try {
-                model.getModelData().saveFile(pathToFile, text);
+                model.getModelData().saveFile(filePath, text);
+                codePage.updateFileInfoDisplay(filePath);
+                multiPage.updateTabName(codePage, filePath);
             } catch (IOException ioe) {
                 JOptionPane.showMessageDialog(frame, ioe.getMessage());
             }

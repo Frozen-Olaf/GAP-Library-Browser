@@ -53,6 +53,15 @@ public class MultiPage extends JPanel implements PropertyChangeListener {
     public Component getCurrentPage() {
         return tabs.getSelectedComponent();
     }
+    
+    public void updateTabName(Page page, String name) {
+        int index = tabs.indexOfComponent(page);
+        if (index != -1) {
+            ((ButtonTab) tabs.getTabComponentAt(index)).updateTabName(name);
+            tabs.setTitleAt(index, name.substring(name.lastIndexOf("/")+1));
+            tabs.validate();
+        }
+    }
 
     public void addPage(String pageName, Component page) {
         tabs.addTab(pageName, page);
