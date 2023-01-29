@@ -2,6 +2,8 @@
 ## version: v1.0.1
 * Allows user to save an edited file to a new file.
 * Allows user to start writing on a new empty file.
+* Allows user to search/replace words within a code file.
+* Allows user to choose/configure search suggestion response time.
 ------------------------------------------------------------------------------------------------------------------------------
 ### This project is a tool to browse the libraries and packages of the GAP system.
 ### It consists of two parts: 
