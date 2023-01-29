@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
@@ -31,14 +33,15 @@ import delegate.page.CodePage;
 import delegate.page.HomePage;
 import model.Model;
 import model.icon.IconVault;
+import model.searchsuggestion.DeferredDocumentListener;
 
 public class UserInterface {
 
-    private static final int FRAME_WIDTH = 800;
-    private static final int FRAME_HEIGHT = 600;
+    private static final int FRAME_WIDTH = 1000;
+    private static final int FRAME_HEIGHT = 750;
 
     private static boolean isInDarkTheme;
-    private static PropertyChangeSupport themeChangeNotifier;
+    private static PropertyChangeSupport UIChangeNotifier;
 
     private JFrame frame;
     private Model model;
@@ -52,7 +55,7 @@ public class UserInterface {
     public UserInterface(Model model, boolean initWithDarkTheme) {
         this.model = model;
         isInDarkTheme = initWithDarkTheme;
-        themeChangeNotifier = new PropertyChangeSupport(this);
+        UIChangeNotifier = new PropertyChangeSupport(this);
     }
 
     public static UserInterface createUI(Model model, boolean initWithDarkTheme) {
@@ -78,8 +81,9 @@ public class UserInterface {
     }
 
     public void addObserver(PropertyChangeListener listener) {
-        themeChangeNotifier.addPropertyChangeListener("dark", listener);
-        themeChangeNotifier.addPropertyChangeListener("light", listener);
+        UIChangeNotifier.addPropertyChangeListener("dark", listener);
+        UIChangeNotifier.addPropertyChangeListener("light", listener);
+        UIChangeNotifier.addPropertyChangeListener("response", listener);
     }
 
     public void init() {
@@ -126,6 +130,15 @@ public class UserInterface {
             }
         };
 
+        initFileMenu(cl);
+        initDisplayMenu(cl);
+        initPageMenu(cl);
+        initConfigureMenu(cl);
+
+        frame.setJMenuBar(menu);
+    }
+
+    private void initFileMenu(ChangeListener cl) {
         JMenu file = new JMenu("File");
         // This is to avoid an undesired behaviour where when menu loses focus,
         // it returns the focus to the previous focus owner for a very short time.
@@ -157,7 +170,6 @@ public class UserInterface {
                 }
             }
         });
-        load.setAccelerator(KeyStroke.getKeyStroke("control L"));
         file.add(load);
 
         JMenuItem save = new JMenuItem("Save");
@@ -214,16 +226,22 @@ public class UserInterface {
                 }
             }
         });
-        save.setAccelerator(KeyStroke.getKeyStroke("control S"));
-        file.add(save);        
-        menu.add(file);
+        file.add(save);
 
+        int c = frame.getToolkit().getMenuShortcutKeyMaskEx();
+        load.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, c));
+        save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, c));
+
+        menu.add(file);
+    }
+
+    private void initDisplayMenu(ChangeListener cl) {
         JMenu display = new JMenu("Display");
         display.addChangeListener(cl);
         JMenu theme = new JMenu("Theme");
         theme.addChangeListener(cl);
-        JMenuItem lightTheme = new JMenuItem("Light theme");
-        JMenuItem darkTheme = new JMenuItem("Dark theme");
+        JMenuItem lightTheme = new JMenuItem("Light Theme");
+        JMenuItem darkTheme = new JMenuItem("Dark Theme");
         theme.add(lightTheme);
         theme.add(darkTheme);
         display.add(theme);
@@ -247,13 +265,21 @@ public class UserInterface {
                 });
             }
         });
-        lightTheme.setAccelerator(KeyStroke.getKeyStroke("control shift L"));
-        darkTheme.setAccelerator(KeyStroke.getKeyStroke("control shift D"));
+
+        int ctrl = frame.getToolkit().getMenuShortcutKeyMaskEx();
+        int shift = InputEvent.SHIFT_DOWN_MASK;
+        lightTheme.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ctrl | shift));
+        darkTheme.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, ctrl | shift));
+
         menu.add(display);
-        
+    }
+
+    private void initPageMenu(ChangeListener cl) {
         JMenu page = new JMenu("Page");
         page.addChangeListener(cl);
-        JMenuItem newCodePage = new JMenuItem("New code page");
+        JMenu codePage = new JMenu("Code Page");
+        codePage.addChangeListener(cl);
+        JMenuItem newCodePage = new JMenuItem("New Page");
         newCodePage.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -267,11 +293,144 @@ public class UserInterface {
                 });
             }
         });
-        newCodePage.setAccelerator(KeyStroke.getKeyStroke("control N"));
-        page.add(newCodePage);
-        menu.add(page);
 
-        frame.setJMenuBar(menu);
+        JMenuItem find = new JMenuItem("Find...");
+        find.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        Component comp = multiPage.getCurrentPage();
+                        if (comp instanceof CodePage) {
+                            CodePage codePage = (CodePage) comp;
+                            codePage.showFindDialog();
+                        } else {
+                            JOptionPane.showMessageDialog(frame, "Can only find words in a code page.");
+                        }
+                    }
+                });
+            }
+        });
+        JMenuItem replace = new JMenuItem("Replace...");
+        replace.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        Component comp = multiPage.getCurrentPage();
+                        if (comp instanceof CodePage) {
+                            CodePage codePage = (CodePage) comp;
+                            codePage.showReplaceDialog();
+                        } else {
+                            JOptionPane.showMessageDialog(frame, "Can only replace words in a code page.");
+                        }
+                    }
+                });
+            }
+        });
+        JMenuItem goToLine = new JMenuItem("Go To Line...");
+        goToLine.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        Component comp = multiPage.getCurrentPage();
+                        if (comp instanceof CodePage) {
+                            CodePage codePage = (CodePage) comp;
+                            codePage.showGoToLineDialog();
+                        } else {
+                            JOptionPane.showMessageDialog(frame, "Can only do this in a code page.");
+                        }
+                    }
+                });
+            }
+        });
+
+        int c = frame.getToolkit().getMenuShortcutKeyMaskEx();
+        newCodePage.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, c));
+        find.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, c));
+        replace.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, c));
+        goToLine.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, c));
+
+        codePage.add(newCodePage);
+        codePage.add(find);
+        codePage.add(replace);
+        codePage.add(goToLine);
+
+        page.add(codePage);
+        menu.add(page);
+    }
+
+    private void initConfigureMenu(ChangeListener cl) {
+        JMenu config = new JMenu("Configure");
+        config.addChangeListener(cl);
+        JMenu searchSuggest = new JMenu("Search Suggestion Response");
+        searchSuggest.addChangeListener(cl);
+
+        JMenuItem faster = new JMenuItem("Faster");
+        JMenuItem slower = new JMenuItem("Slower");
+        JMenuItem custom = new JMenuItem("Custom");
+
+        faster.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        UIChangeNotifier.firePropertyChange("response", 0,
+                                DeferredDocumentListener.FASTER_RESPONSE_TIME);
+                    }
+                });
+            }
+        });
+        slower.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        UIChangeNotifier.firePropertyChange("response", 0,
+                                DeferredDocumentListener.SLOWER_RESPONSE_TIME);
+                    }
+                });
+            }
+        });
+        custom.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        String delay;
+                        int delayTime = DeferredDocumentListener.FASTER_RESPONSE_TIME;
+                        while (true) {
+                            delay = JOptionPane.showInputDialog(frame,
+                                    "Please enter a response time in milliseconds (ms)\n"
+                                            + "[suggested range: 250-1000ms]");
+                            if (delay == null)
+                                return;
+                            try {
+                                delayTime = Integer.parseInt(delay);
+                                break;
+                            } catch (NumberFormatException nfe) {
+                                JOptionPane.showMessageDialog(frame, "Please enter a valid number");
+                            }
+                        }
+                        UIChangeNotifier.firePropertyChange("response", 0, delayTime);
+                    }
+                });
+            }
+        });
+
+        int ctrl = frame.getToolkit().getMenuShortcutKeyMaskEx();
+        int shift = InputEvent.SHIFT_DOWN_MASK;
+        faster.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, ctrl | shift));
+        slower.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ctrl | shift));
+        custom.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ctrl | shift));
+
+        searchSuggest.add(faster);
+        searchSuggest.add(slower);
+        searchSuggest.add(custom);
+
+        config.add(searchSuggest);
+        menu.add(config);
     }
 
     private void saveToFileFromCodePage(CodePage codePage, String filePath) {
@@ -294,11 +453,11 @@ public class UserInterface {
             if (isDarkTheme) {
                 UIManager.setLookAndFeel("com.formdev.flatlaf.themes.FlatMacDarkLaf");
                 SwingUtilities.updateComponentTreeUI(frame);
-                themeChangeNotifier.firePropertyChange("dark", null, null);
+                UIChangeNotifier.firePropertyChange("dark", null, null);
             } else {
                 UIManager.setLookAndFeel("com.formdev.flatlaf.themes.FlatMacLightLaf");
                 SwingUtilities.updateComponentTreeUI(frame);
-                themeChangeNotifier.firePropertyChange("light", null, null);
+                UIChangeNotifier.firePropertyChange("light", null, null);
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
                 | UnsupportedLookAndFeelException e) {

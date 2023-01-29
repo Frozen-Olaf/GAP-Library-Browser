@@ -8,6 +8,9 @@ import javax.swing.event.DocumentListener;
 
 public class DeferredDocumentListener implements DocumentListener {
 
+    public static final int FASTER_RESPONSE_TIME = 250;
+    public static final int SLOWER_RESPONSE_TIME = 750;
+
     private final Timer timer;
     private boolean isRemovingText;
 
@@ -45,8 +48,8 @@ public class DeferredDocumentListener implements DocumentListener {
         timer.restart();
     }
 
-    public void setDisableTextEvent(boolean val) {
-        disableTextEvent = val;
+    public void setDisableTextEvent(boolean disableTextEvent) {
+        this.disableTextEvent = disableTextEvent;
     }
 
     public boolean getIsRemovingText() {
@@ -55,6 +58,11 @@ public class DeferredDocumentListener implements DocumentListener {
 
     public void setUpdateType(boolean isRemovingText) {
         this.isRemovingText = isRemovingText;
+    }
+
+    public void updateDelayTime(int delay) {
+        timer.setDelay(delay);
+        timer.setInitialDelay(delay);
     }
 
 }

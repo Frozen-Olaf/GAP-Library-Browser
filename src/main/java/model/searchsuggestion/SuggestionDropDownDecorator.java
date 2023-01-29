@@ -41,12 +41,13 @@ public class SuggestionDropDownDecorator<C extends JComponent> implements Proper
 
     private boolean disableTextEvent;
 
-    private final DeferredDocumentListener ddl = new DeferredDocumentListener(250, new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            update(ddl.getIsRemovingText());
-        }
-    }, false);
+    private final DeferredDocumentListener ddl = new DeferredDocumentListener(
+            DeferredDocumentListener.FASTER_RESPONSE_TIME, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    update(ddl.getIsRemovingText());
+                }
+            }, false);
 
     public SuggestionDropDownDecorator(UserInterface userInterface, C invoker, boolean isInMethodArgumentInputMode,
             SuggestionClient<C> suggestionClient) {
@@ -243,6 +244,12 @@ public class SuggestionDropDownDecorator<C extends JComponent> implements Proper
                         popupMenu.updateUI();
                         scrollList.getVerticalScrollBar().updateUI();
                     }
+                }
+            });
+        } else if (propertyName == "response") {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    ddl.updateDelayTime((int) evt.getNewValue());
                 }
             });
         }

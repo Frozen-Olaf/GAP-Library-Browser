@@ -4,8 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
@@ -32,15 +30,23 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
 
+import org.fife.rsta.ui.GoToDialog;
+import org.fife.rsta.ui.search.FindDialog;
+import org.fife.rsta.ui.search.ReplaceDialog;
+import org.fife.rsta.ui.search.SearchEvent;
+import org.fife.rsta.ui.search.SearchListener;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.LineNumberList;
 import org.fife.ui.rtextarea.RTextScrollPane;
+import org.fife.ui.rtextarea.SearchContext;
+import org.fife.ui.rtextarea.SearchEngine;
+import org.fife.ui.rtextarea.SearchResult;
 
 import delegate.UserInterface;
 import model.Model;
 
-public class CodePage extends Page {
+public class CodePage extends Page implements SearchListener {
 
     private static final Color LIGHT_LINE_HIGHLIGHT_COLOR = Color.decode("#f0f4fc");
     private static final Color DARK_LINE_HIGHLIGHT_COLOR = Color.decode("#38343c");
@@ -56,7 +62,11 @@ public class CodePage extends Page {
     private JTextField info;
     private JCheckBox cbSearchBar;
     private RSyntaxTextArea codeText;
+    private LineNumberList lineNumberBar;
     private RTextScrollPane sp;
+
+    private FindDialog findDialog;
+    private ReplaceDialog replaceDialog;
 
     private boolean highlightOn = true;
     private boolean isEdited;
@@ -103,6 +113,34 @@ public class CodePage extends Page {
         codeText.discardAllEdits();
     }
 
+    public void showFindDialog() {
+        replaceDialog.setVisible(false);
+        findDialog.setVisible(true);
+    }
+
+    public void showReplaceDialog() {
+        findDialog.setVisible(false);
+        replaceDialog.setVisible(true);
+    }
+
+    public void showGoToLineDialog() {
+        findDialog.setVisible(false);
+        replaceDialog.setVisible(false);
+
+        GoToDialog dialog = new GoToDialog(frame);
+        dialog.setMaxLineNumberAllowed(codeText.getLineCount());
+        dialog.setVisible(true);
+        int line = dialog.getLineNumber();
+        if (line > 0) {
+            try {
+                codeText.setCaretPosition(codeText.getLineStartOffset(line - 1));
+            } catch (BadLocationException ble) { // Never happens
+                UIManager.getLookAndFeel().provideErrorFeedback(codeText);
+                ble.printStackTrace();
+            }
+        }
+    }
+
     private void init() {
         contentPanel = new JPanel(new BorderLayout());
         initHeader();
@@ -119,6 +157,16 @@ public class CodePage extends Page {
         splitPane.setResizeWeight(1.0);
         splitPane.setDividerLocation(1.0);
         add(splitPane, BorderLayout.CENTER);
+
+        findDialog = new FindDialog(frame, this);
+        replaceDialog = new ReplaceDialog(frame, this);
+        // This ties the properties of the two dialogs together (match case,
+        // regex, etc.).
+        SearchContext context = findDialog.getSearchContext();
+        replaceDialog.setSearchContext(context);
+
+        findDialog.setVisible(false);
+        replaceDialog.setVisible(false);
     }
 
     private void initHeader() {
@@ -188,16 +236,25 @@ public class CodePage extends Page {
         codeText.setBackground(UIManager.getColor("TextArea.background"));
         codeText.setSelectionColor(UIManager.getColor("TextArea.selectionBackground"));
         codeText.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
-        codeText.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+        codeText.setCodeFoldingEnabled(false);
+        codeText.setMarkOccurrences(true);
+        codeText.setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 0));
 
-        Color lineHighlightColor = UserInterface.getIsInDarkTheme() ? DARK_LINE_HIGHLIGHT_COLOR
-                : LIGHT_LINE_HIGHLIGHT_COLOR;
-        codeText.setCurrentLineHighlightColor(lineHighlightColor);
+        if (UserInterface.getIsInDarkTheme()) {
+            codeText.setCurrentLineHighlightColor(DARK_LINE_HIGHLIGHT_COLOR);
+            codeText.setMarkAllHighlightColor(Color.decode("#0f6614"));
+        } else {
+            codeText.setCurrentLineHighlightColor(LIGHT_LINE_HIGHLIGHT_COLOR);
+            codeText.setMarkAllHighlightColor(Color.decode("#fcc82b"));
+        }
+
         if (!isNewEmptyCodePage) {
             initCodeContentAndHighlight();
         }
 
         codeText.getDocument().addDocumentListener(new DocumentListener() {
+            private int initialRowCount = codeText.getRows();
+
             @Override
             public void insertUpdate(DocumentEvent e) {
                 fileEditStateUpdate();
@@ -206,11 +263,12 @@ public class CodePage extends Page {
             @Override
             public void removeUpdate(DocumentEvent e) {
                 fileEditStateUpdate();
+                if (checkRowCountChange())
+                    lineNumberBar.repaint();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                fileEditStateUpdate();
             }
 
             private void fileEditStateUpdate() {
@@ -224,19 +282,22 @@ public class CodePage extends Page {
                     }
                 });
             }
+
+            private boolean checkRowCountChange() {
+                int newRowCount = codeText.getLineCount();
+                if (newRowCount != initialRowCount) {
+                    initialRowCount = newRowCount;
+                    return true;
+                }
+                return false;
+            }
         });
 
-        LineNumberList lineNumberBar = new LineNumberList(codeText) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D graphics = (Graphics2D) g;
-                graphics.setColor(UIManager.getColor("TextArea.background"));
-                graphics.fillRect(0, 0, getWidth(), getHeight());
-                super.paintComponent(g);
-            }
-
-            private static final long serialVersionUID = 1L;
-        };
+        lineNumberBar = new LineNumberList(codeText);
+        if (UserInterface.getIsInDarkTheme())
+            lineNumberBar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.decode("#363636")));
+        else
+            lineNumberBar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.decode("#d4d4d4")));
 
         sp = new RTextScrollPane(codeText);
         sp.setRowHeaderView(lineNumberBar);
@@ -276,7 +337,7 @@ public class CodePage extends Page {
                     new DefaultHighlighter.DefaultHighlightPainter(UIManager.getColor("TextArea.selectionBackground")));
         } catch (BadLocationException e) {
         }
-        
+
         codeText.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -300,6 +361,7 @@ public class CodePage extends Page {
                 }
             }
         });
+
     }
 
     @Override
@@ -310,16 +372,21 @@ public class CodePage extends Page {
         if (propertyName == "light" || propertyName == "dark") {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    codeText.setBackground(UIManager.getColor("TextArea.background"));
-                    codeText.setForeground(UIManager.getColor("TextArea.foreground"));
-                    codeText.setSelectionColor(UIManager.getColor("TextArea.selectionBackground"));
+                    findDialog.updateUI();
+                    replaceDialog.updateUI();
 
                     if (propertyName == "light") {
-                        header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.decode("#d4d4d4")));
+                        Color light = Color.decode("#d4d4d4");
+                        lineNumberBar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, light));
+                        header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, light));
                         codeText.setCurrentLineHighlightColor(LIGHT_LINE_HIGHLIGHT_COLOR);
+                        codeText.setMarkAllHighlightColor(Color.decode("#fcc82b"));
                     } else if (propertyName == "dark") {
-                        header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.decode("#363636")));
+                        Color dark = Color.decode("#363636");
+                        lineNumberBar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, dark));
+                        header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, dark));
                         codeText.setCurrentLineHighlightColor(DARK_LINE_HIGHLIGHT_COLOR);
+                        codeText.setMarkAllHighlightColor(Color.decode("#0f6614"));
                     }
                     if (!isNewEmptyCodePage) {
                         if (!isEdited && highlightOn) {
@@ -337,6 +404,41 @@ public class CodePage extends Page {
                 }
             });
         }
+    }
+
+    @Override
+    public void searchEvent(SearchEvent e) {
+        SearchEvent.Type type = e.getType();
+        SearchContext context = e.getSearchContext();
+        SearchResult result;
+
+        switch (type) {
+        default: // Prevent FindBugs warning later
+        case MARK_ALL:
+            result = SearchEngine.markAll(codeText, context);
+            break;
+        case FIND:
+            result = SearchEngine.find(codeText, context);
+            if (!result.wasFound() || result.isWrapped()) {
+                UIManager.getLookAndFeel().provideErrorFeedback(codeText);
+            }
+            break;
+        case REPLACE:
+            result = SearchEngine.replace(codeText, context);
+            if (!result.wasFound() || result.isWrapped()) {
+                UIManager.getLookAndFeel().provideErrorFeedback(codeText);
+            }
+            break;
+        case REPLACE_ALL:
+            result = SearchEngine.replaceAll(codeText, context);
+            JOptionPane.showMessageDialog(frame, result.getCount() + " occurrences replaced.");
+            break;
+        }
+    }
+
+    @Override
+    public String getSelectedText() {
+        return codeText.getSelectedText();
     }
 
     private static final long serialVersionUID = 1L;

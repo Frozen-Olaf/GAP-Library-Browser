@@ -20,7 +20,7 @@ public class Delegate implements PropertyChangeListener {
         userInterface = UserInterface.createUI(model, initWithDarkTheme);
         frame = userInterface.getFrame();
 
-        this.model.addObserver(this);
+        model.addObserver(this);
     }
 
     /**
