@@ -1,11 +1,13 @@
+/Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/searchbar/CornerRoundedTextPane.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/model/icon/IconVault.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/model/searchsuggestion/DeferredDocumentListener.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/model/data/Method.java
+/Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/page/CustomGoToDialog.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/multipage/ButtonTab.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/table/CustomTable.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/model/searchsuggestion/QuadFunction.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/model/search/SearchClient.java
-/Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/searchbar/CornerRoundedPanel.java
+/Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/page/CustomFindDialog.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/Delegate.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/model/search/ModelSearchClient.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/page/Page.java
@@ -18,6 +20,7 @@
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/model/searchsuggestion/SuggestionEntry.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/UserInterface.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/button/ButtonDecorator.java
+/Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/page/CustomReplaceDialog.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/page/CodePage.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/multipage/MultiPage.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/model/searchsuggestion/TextComponentWordSuggestionClient.java
