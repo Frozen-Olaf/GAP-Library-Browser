@@ -30,8 +30,6 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
 
-import org.fife.rsta.ui.GoToDialog;
-import org.fife.rsta.ui.search.FindDialog;
 import org.fife.rsta.ui.search.ReplaceDialog;
 import org.fife.rsta.ui.search.SearchEvent;
 import org.fife.rsta.ui.search.SearchListener;
@@ -65,7 +63,7 @@ public class CodePage extends Page implements SearchListener {
     private LineNumberList lineNumberBar;
     private RTextScrollPane sp;
 
-    private FindDialog findDialog;
+    private CustomFindDialog findDialog;
     private ReplaceDialog replaceDialog;
 
     private boolean highlightOn = true;
@@ -127,7 +125,7 @@ public class CodePage extends Page implements SearchListener {
         findDialog.setVisible(false);
         replaceDialog.setVisible(false);
 
-        GoToDialog dialog = new GoToDialog(frame);
+        CustomGoToDialog dialog = new CustomGoToDialog(frame);
         dialog.setMaxLineNumberAllowed(codeText.getLineCount());
         dialog.setVisible(true);
         int line = dialog.getLineNumber();
@@ -158,7 +156,7 @@ public class CodePage extends Page implements SearchListener {
         splitPane.setDividerLocation(1.0);
         add(splitPane, BorderLayout.CENTER);
 
-        findDialog = new FindDialog(frame, this);
+        findDialog = new CustomFindDialog(frame, this);
         replaceDialog = new ReplaceDialog(frame, this);
         // This ties the properties of the two dialogs together (match case,
         // regex, etc.).

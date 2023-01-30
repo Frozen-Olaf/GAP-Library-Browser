@@ -2,6 +2,7 @@ package delegate;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -39,7 +40,9 @@ public class UserInterface {
 
     private static final int FRAME_WIDTH = 1000;
     private static final int FRAME_HEIGHT = 750;
-
+    
+    private static final int FRAME_MIN_WIDTH = 386;
+    
     private static boolean isInDarkTheme;
     private static PropertyChangeSupport UIChangeNotifier;
 
@@ -99,6 +102,7 @@ public class UserInterface {
         initMenu();
 
         frame.setSize(FRAME_WIDTH, FRAME_HEIGHT);
+        frame.setMinimumSize(new Dimension(FRAME_MIN_WIDTH, 0));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setIconImage(IconVault.getGAPIconImage());
         frame.setVisible(true);
@@ -452,13 +456,12 @@ public class UserInterface {
         try {
             if (isDarkTheme) {
                 UIManager.setLookAndFeel("com.formdev.flatlaf.themes.FlatMacDarkLaf");
-                SwingUtilities.updateComponentTreeUI(frame);
                 UIChangeNotifier.firePropertyChange("dark", null, null);
             } else {
                 UIManager.setLookAndFeel("com.formdev.flatlaf.themes.FlatMacLightLaf");
-                SwingUtilities.updateComponentTreeUI(frame);
                 UIChangeNotifier.firePropertyChange("light", null, null);
             }
+            SwingUtilities.updateComponentTreeUI(frame);
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
                 | UnsupportedLookAndFeelException e) {
             e.printStackTrace();

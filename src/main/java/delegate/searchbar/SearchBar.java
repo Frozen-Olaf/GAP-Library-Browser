@@ -3,7 +3,6 @@ package delegate.searchbar;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.ComponentOrientation;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -62,7 +61,7 @@ public class SearchBar extends JPanel implements PropertyChangeListener {
     private final SuggestionClient<JTextComponent> suggestionClient;
 
     private JButton searchInputBtn;
-    private CornerRoundedPanel searchInputBar;
+    private CornerRoundedTextPane searchInputBar;
     private JTextField searchInput;
     private JButton eraseBtn;
 
@@ -109,8 +108,8 @@ public class SearchBar extends JPanel implements PropertyChangeListener {
             model.setSearchState(SearchClient.STATE_IDLE);
     }
 
-    private List<SuggestionEntry> newSearchSuggestion(String input, boolean isInMethodArgumentInputMode,
-            boolean hasSearchStateChanged, List<SuggestionEntry> previousResult) {
+    private List<SuggestionEntry> newSearchSuggestion(String input, Boolean isInMethodArgumentInputMode,
+            Boolean hasSearchStateChanged, List<SuggestionEntry> previousResult) {
         if (previousResult.isEmpty() || hasSearchStateChanged) {
             int searchState = isInMethodArgumentInputMode ? SearchClient.STATE_SEARCH_FILTER : model.getSearchState();
 
@@ -171,18 +170,15 @@ public class SearchBar extends JPanel implements PropertyChangeListener {
     }
 
     private void initSearchInputBar() {
-        searchInputBar = new CornerRoundedPanel(new BorderLayout(), true);
-
-        searchInput = new JTextField();
+        searchInputBar = new CornerRoundedTextPane(new BorderLayout(), true);
+        searchInput = searchInputBar.getTextField();
         String initInfo = "Please enter here to search...";
         if (isPrimary) {
             isInitialInputInfoSet = true;
             searchInput.setForeground(Color.decode("#bfbfbf"));
             searchInput.setText(initInfo);
         }
-        searchInput.setOpaque(false);
-        searchInput.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-        searchInput.addFocusListener(new FocusListener() {
+        searchInputBar.replaceFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
                 if (isInitialInputInfoSet) {
@@ -201,11 +197,8 @@ public class SearchBar extends JPanel implements PropertyChangeListener {
             }
 
         });
-        Dimension sl = new Dimension(50, 36);
-        searchInput.setPreferredSize(sl);
-        searchInput.setMinimumSize(new Dimension(0, sl.height));
+        searchInputBar.setTextFieldSize(50, 36);
         SuggestionDropDownDecorator.decorate(userInterface, searchInput, false, suggestionClient);
-        searchInputBar.add(searchInput, BorderLayout.CENTER);
 
         eraseBtn = new JButton(IconVault.getEraseIcon());
         eraseBtn.setToolTipText("Erase the input");

@@ -7,8 +7,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +15,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.text.JTextComponent;
 
@@ -159,8 +156,8 @@ public class MethodSearchInputPane extends JPanel {
 
         private int argNum;
         private JLabel argumentLabel;
-        private CornerRoundedPanel textPanel;
-        private JTextField argumentInput;
+        private CornerRoundedTextPane textPane;
+//        private JTextField argumentInput;
         private JCheckBox cbSearchForSuperset;
 
         public MethodSearchArgumentInputBar(int num) {
@@ -170,7 +167,8 @@ public class MethodSearchInputPane extends JPanel {
         }
 
         public String getText() {
-            return argumentInput.getText().trim();
+            return textPane.getText();
+//            return argumentInput.getText().trim();
         }
 
         public boolean isSearchingForSuperset() {
@@ -178,12 +176,12 @@ public class MethodSearchInputPane extends JPanel {
         }
 
         public Pair<String, Boolean> getInputInfo() {
-            String text = argumentInput.getText();
+            String text = textPane.getText();
             return (text.isBlank() && !isSearchingForSuperset()) ? null : Pair.of(getText(), isSearchingForSuperset());
         }
 
         public void clear() {
-            argumentInput.setText("");
+            textPane.setText("");
             cbSearchForSuperset.setSelected(false);
         }
 
@@ -192,37 +190,19 @@ public class MethodSearchInputPane extends JPanel {
             argumentLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
             argumentLabel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 3));
 
-            textPanel = new CornerRoundedPanel(new BorderLayout(), false);
-            argumentInput = new JTextField();
-            argumentLabel.setLabelFor(argumentInput);
-            Dimension s = argumentLabel.getPreferredSize();
-            s.setSize(s.width, 32);
-            argumentInput.setPreferredSize(s);
-            argumentInput.setMinimumSize(new Dimension(0, s.height));
-            argumentInput.setOpaque(false);
-            argumentInput.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-            argumentInput.addFocusListener(new FocusListener() {
-                @Override
-                public void focusGained(FocusEvent e) {
-                    textPanel.setPaintBorder(true);
-                }
-
-                @Override
-                public void focusLost(FocusEvent e) {
-                    textPanel.setPaintBorder(false);
-                }
-            });
-            textPanel.add(argumentInput, BorderLayout.CENTER);
+            textPane = new CornerRoundedTextPane(new BorderLayout(), false);
+            argumentLabel.setLabelFor(textPane.getTextField());
+            textPane.setTextFieldSize(50, 32);
 
             cbSearchForSuperset = new JCheckBox("Superset");
             cbSearchForSuperset.setToolTipText("Search for superset of these filters");
 
             add(argumentLabel, BorderLayout.WEST);
-            add(textPanel, BorderLayout.CENTER);
+            add(textPane, BorderLayout.CENTER);
             add(cbSearchForSuperset, BorderLayout.EAST);
             setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
 
-            SuggestionDropDownDecorator.decorate(userInterface, argumentInput, true, suggestionClient);
+            SuggestionDropDownDecorator.decorate(userInterface, textPane.getTextField(), true, suggestionClient);
         }
 
         private static final long serialVersionUID = 1L;

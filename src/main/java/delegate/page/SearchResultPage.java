@@ -8,8 +8,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
@@ -38,9 +36,9 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableRowSorter;
 
-import delegate.button.ButtonDecorator;
 import delegate.UserInterface;
-import delegate.searchbar.CornerRoundedPanel;
+import delegate.button.ButtonDecorator;
+import delegate.searchbar.CornerRoundedTextPane;
 import delegate.table.CustomTable;
 import delegate.table.CustomTableModel;
 import model.Model;
@@ -61,7 +59,7 @@ public class SearchResultPage extends Page {
 
     private JPanel filterPanel;
     private JButton filterBtn;
-    private CornerRoundedPanel filterTextPanel;
+    private CornerRoundedTextPane filterTextPane;
     private JTextField filterText;
     private JCheckBox cbHideTrivial;
 
@@ -158,22 +156,10 @@ public class SearchResultPage extends Page {
     private void initFilter() {
         filterPanel = new JPanel(new BorderLayout());
 
-        filterTextPanel = new CornerRoundedPanel(new BorderLayout(), true);
-        filterTextPanel.setBorder(BorderFactory.createEmptyBorder());
-        filterText = new JTextField();
-        filterText.setOpaque(false);
-        filterText.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-        filterText.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                filterTextPanel.setPaintBorder(true);
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                filterTextPanel.setPaintBorder(false);
-            }
-        });
+        filterTextPane = new CornerRoundedTextPane(new BorderLayout(), true);
+        filterTextPane.setBorder(BorderFactory.createEmptyBorder());
+        filterTextPane.setFixedTextFieldSize(120, 28);
+        filterText = filterTextPane.getTextField();
         filterText.getDocument().addDocumentListener(new DocumentListener() {
             public void changedUpdate(DocumentEvent e) {
                 newTableFilter();
@@ -187,11 +173,6 @@ public class SearchResultPage extends Page {
                 newTableFilter();
             }
         });
-
-        Dimension d = new Dimension(120, 28);
-        filterText.setMinimumSize(d);
-        filterText.setPreferredSize(d);
-        filterTextPanel.add(filterText, BorderLayout.CENTER);
 
         filterBtn = new JButton(IconVault.getFilterIcon());
         filterBtn.setToolTipText("Filter the table by your input text");
@@ -230,7 +211,7 @@ public class SearchResultPage extends Page {
         });
 
         filterPanel.add(filterBtn, BorderLayout.WEST);
-        filterPanel.add(filterTextPanel, BorderLayout.CENTER);
+        filterPanel.add(filterTextPane, BorderLayout.CENTER);
         filterPanel.add(cbHideTrivial, BorderLayout.EAST);
     }
 
