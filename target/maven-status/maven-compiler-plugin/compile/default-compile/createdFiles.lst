@@ -1,8 +1,7 @@
 delegate/page/CustomGoToDialog.class
-delegate/page/CodePage$3$1.class
 delegate/UserInterface$12$1.class
+delegate/CornerRoundedTextPane.class
 delegate/searchbar/SearchBar$2.class
-delegate/searchbar/CornerRoundedTextPane.class
 delegate/page/CustomFindDialog$FindFocusAdapter.class
 delegate/page/Page$2.class
 delegate/Delegate$4.class
@@ -13,9 +12,9 @@ delegate/page/CustomFindDialog.class
 delegate/page/SearchResultPage$7.class
 delegate/searchbar/MethodSearchInputPane$1.class
 delegate/searchbar/SearchBar$5.class
+delegate/CornerRoundedTextPane$1.class
 delegate/UserInterface$1.class
 model/searchsuggestion/SuggestionDropDownDecorator$6.class
-delegate/searchbar/CornerRoundedTextPane$1.class
 delegate/multipage/ButtonTab$TabCloseButton.class
 model/searchsuggestion/QuadFunction.class
 delegate/table/CustomTable.class
@@ -23,6 +22,7 @@ model/searchsuggestion/SuggestionDropDownDecorator$3.class
 model/data/ModelData.class
 delegate/page/SearchResultPage$4.class
 delegate/UserInterface$4.class
+delegate/SearchSuggestionResponseTimeDialog.class
 delegate/table/CustomTable$1$1.class
 delegate/page/CodePage$6.class
 delegate/page/SearchResultPage$1.class
@@ -31,6 +31,7 @@ delegate/table/CustomTable$1.class
 delegate/UserInterface$7.class
 delegate/page/CustomGoToDialog$Listener.class
 delegate/page/CustomReplaceDialog$ReplaceFocusAdapter.class
+delegate/page/CodePage$4$1.class
 delegate/multipage/ButtonTab$TabCloseButton$1.class
 delegate/searchbar/SearchBar$4.class
 model/searchsuggestion/SuggestionDropDownDecorator$2.class
@@ -59,9 +60,9 @@ model/searchsuggestion/SuggestionClient.class
 delegate/page/CustomReplaceDialog.class
 delegate/UserInterface$9$1.class
 delegate/Delegate$7.class
+delegate/UserInterface$13$1.class
 delegate/UserInterface.class
 model/searchsuggestion/SuggestionDropDownDecorator$7.class
-delegate/UserInterface$10$1.class
 delegate/page/SearchResultPage$3.class
 delegate/table/CustomTableModel.class
 delegate/page/CustomGoToDialog$NumberDocumentFilter.class
@@ -70,6 +71,7 @@ delegate/UserInterface$10.class
 model/searchsuggestion/SuggestionDropDownDecorator$4.class
 delegate/UserInterface$5$1.class
 delegate/UserInterface$3.class
+delegate/UserInterface$13.class
 delegate/searchbar/SearchBar.class
 delegate/page/CustomFindDialog$FindDocumentListener.class
 delegate/page/CodePage$5.class
@@ -96,9 +98,11 @@ delegate/UserInterface$11.class
 main/Main.class
 delegate/UserInterface$11$1.class
 delegate/Delegate.class
+delegate/page/CodePage$7.class
 delegate/table/CustomTable$2.class
 delegate/page/SearchResultPage$5.class
 delegate/button/ButtonDecorator$1.class
+delegate/SearchSuggestionResponseTimeDialog$1.class
 delegate/multipage/ButtonTab.class
 delegate/UserInterface$4$1.class
 delegate/table/CustomTable$1$2.class
@@ -113,7 +117,9 @@ delegate/Delegate$3.class
 model/search/SearchClient.class
 delegate/page/CodePage$1.class
 delegate/page/SearchResultPage$6.class
+delegate/button/ButtonDecorator$2.class
 delegate/searchbar/SearchBar$2$1.class
 delegate/multipage/MultiPage$1.class
 delegate/searchbar/SearchBar$1.class
 model/searchsuggestion/SuggestionDropDownDecorator$5.class
+delegate/SearchSuggestionResponseTimeDialog$2.class

@@ -1,4 +1,3 @@
-/Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/searchbar/CornerRoundedTextPane.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/model/icon/IconVault.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/model/searchsuggestion/DeferredDocumentListener.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/model/data/Method.java
@@ -17,6 +16,7 @@
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/model/searchsuggestion/SuggestionDropDownDecorator.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/page/HomePage.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/searchbar/MethodSearchInputPane.java
+/Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/CornerRoundedTextPane.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/model/searchsuggestion/SuggestionEntry.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/UserInterface.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/button/ButtonDecorator.java
@@ -26,5 +26,6 @@
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/model/searchsuggestion/TextComponentWordSuggestionClient.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/page/SearchResultPage.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/main/Main.java
+/Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/SearchSuggestionResponseTimeDialog.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/model/Model.java
 /Users/macbookpro/projects/GAP-Library-Browser/src/main/java/delegate/searchbar/SearchBar.java
