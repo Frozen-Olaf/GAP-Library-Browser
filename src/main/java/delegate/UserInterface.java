@@ -7,6 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
@@ -35,14 +37,15 @@ import delegate.page.HomePage;
 import model.Model;
 import model.icon.IconVault;
 import model.searchsuggestion.DeferredDocumentListener;
+import model.searchsuggestion.SuggestionDropDownDecorator;
 
 public class UserInterface {
 
     private static final int FRAME_WIDTH = 1000;
     private static final int FRAME_HEIGHT = 750;
-    
+
     private static final int FRAME_MIN_WIDTH = 386;
-    
+
     private static boolean isInDarkTheme;
     private static PropertyChangeSupport UIChangeNotifier;
 
@@ -51,6 +54,7 @@ public class UserInterface {
 
     private JMenuBar menu;
     private JFileChooser fileChooser;
+    private SearchSuggestionResponseTimeDialog dialog;
 
     private static MultiPage multiPage;
     private HomePage homePage;
@@ -88,8 +92,17 @@ public class UserInterface {
         UIChangeNotifier.addPropertyChangeListener("light", listener);
         UIChangeNotifier.addPropertyChangeListener("response", listener);
     }
+    
+    public void setMenuBarEnabled(boolean enabled) {
+        for (int i = 0; i < menu.getMenuCount(); i++) {
+            JMenu currentMenu = menu.getMenu(i);
+            for (int j = 0; j < currentMenu.getItemCount(); j++) {
+                currentMenu.getItem(j).setEnabled(enabled);
+            }
+        }
+    }
 
-    public void init() {
+    private void init() {
         initLafTheme();
 
         frame = new JFrame("GAP Library Browser");
@@ -375,6 +388,23 @@ public class UserInterface {
         JMenuItem slower = new JMenuItem("Slower");
         JMenuItem custom = new JMenuItem("Custom");
 
+        dialog = new SearchSuggestionResponseTimeDialog(frame, UIChangeNotifier, "Search Suggestion Response Time Slider");
+        dialog.addWindowFocusListener(new WindowFocusListener() {
+            @Override
+            public void windowGainedFocus(WindowEvent e) {
+                SwingUtilities.invokeLater(() -> {
+                    setMenuBarEnabled(false);
+                });
+            }
+
+            @Override
+            public void windowLostFocus(WindowEvent e) {
+                SwingUtilities.invokeLater(() -> {
+                    setMenuBarEnabled(true);
+                });
+            }
+        });
+
         faster.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -382,6 +412,8 @@ public class UserInterface {
                     public void run() {
                         UIChangeNotifier.firePropertyChange("response", 0,
                                 DeferredDocumentListener.FASTER_RESPONSE_TIME);
+                        SuggestionDropDownDecorator
+                                .setSearchSuggestionResponseTime(DeferredDocumentListener.FASTER_RESPONSE_TIME);
                     }
                 });
             }
@@ -393,6 +425,8 @@ public class UserInterface {
                     public void run() {
                         UIChangeNotifier.firePropertyChange("response", 0,
                                 DeferredDocumentListener.SLOWER_RESPONSE_TIME);
+                        SuggestionDropDownDecorator
+                                .setSearchSuggestionResponseTime(DeferredDocumentListener.SLOWER_RESPONSE_TIME);
                     }
                 });
             }
@@ -402,22 +436,9 @@ public class UserInterface {
             public void actionPerformed(ActionEvent actionEvent) {
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
-                        String delay;
-                        int delayTime = DeferredDocumentListener.FASTER_RESPONSE_TIME;
-                        while (true) {
-                            delay = JOptionPane.showInputDialog(frame,
-                                    "Please enter a response time in milliseconds (ms)\n"
-                                            + "[suggested range: 250-1000ms]");
-                            if (delay == null)
-                                return;
-                            try {
-                                delayTime = Integer.parseInt(delay);
-                                break;
-                            } catch (NumberFormatException nfe) {
-                                JOptionPane.showMessageDialog(frame, "Please enter a valid number");
-                            }
-                        }
-                        UIChangeNotifier.firePropertyChange("response", 0, delayTime);
+                        dialog.getSlider().setValue(SuggestionDropDownDecorator.getSearchSuggestionResponseTime());
+                        dialog.setLocationRelativeTo(frame);
+                        dialog.setVisible(true);
                     }
                 });
             }
@@ -468,6 +489,7 @@ public class UserInterface {
         }
         isInDarkTheme = isDarkTheme;
         fileChooser.updateUI();
+        SwingUtilities.updateComponentTreeUI(dialog);
     }
 
 }

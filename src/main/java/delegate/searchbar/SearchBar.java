@@ -35,6 +35,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.text.JTextComponent;
 
+import delegate.CornerRoundedTextPane;
 import delegate.UserInterface;
 import delegate.button.ButtonDecorator;
 import delegate.page.HomePage;

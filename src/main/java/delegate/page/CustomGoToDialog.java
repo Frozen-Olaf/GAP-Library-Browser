@@ -32,7 +32,8 @@ import javax.swing.text.DocumentFilter;
 import org.fife.rsta.ui.EscapableDialog;
 import org.fife.rsta.ui.UIUtil;
 
-import delegate.searchbar.CornerRoundedTextPane;
+import delegate.CornerRoundedTextPane;
+import delegate.button.ButtonDecorator;
 
 public class CustomGoToDialog extends EscapableDialog {
 
@@ -102,6 +103,8 @@ public class CustomGoToDialog extends EscapableDialog {
         okButton.addActionListener(l);
         cancelButton = UIUtil.newButton(MSG, "Cancel");
         cancelButton.addActionListener(l);
+        ButtonDecorator.addDefaultMouseListenerWithBorderAlwaysDrawn(okButton);
+        ButtonDecorator.addDefaultMouseListenerWithBorderAlwaysDrawn(cancelButton);
         Container bottomPanel = createButtonPanel(okButton, cancelButton);
 
         // Put everything into a neat little package.
@@ -150,7 +153,7 @@ public class CustomGoToDialog extends EscapableDialog {
     /**
      * Returns a panel containing the OK and Cancel buttons. This panel is added to
      * the bottom of this dialog. Applications that don't like these buttons
-     * right-aligned in the dialog can override this method to change that behavior.
+     * right-aligned in the dialog can override this method to change that behaviour.
      *
      * @param ok     The OK button.
      * @param cancel The Cancel button.

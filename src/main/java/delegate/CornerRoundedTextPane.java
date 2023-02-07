@@ -1,4 +1,4 @@
-package delegate.searchbar;
+package delegate;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -14,8 +14,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
-
-import delegate.UserInterface;
 
 public class CornerRoundedTextPane extends JPanel {
 

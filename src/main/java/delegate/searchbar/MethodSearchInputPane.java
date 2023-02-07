@@ -20,6 +20,7 @@ import javax.swing.text.JTextComponent;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import delegate.CornerRoundedTextPane;
 import delegate.UserInterface;
 import delegate.button.ButtonDecorator;
 import model.icon.IconVault;

@@ -10,6 +10,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
 import java.beans.PropertyChangeEvent;
 import java.io.IOException;
 import java.util.Arrays;
@@ -162,7 +164,24 @@ public class CodePage extends Page implements SearchListener {
         // regex, etc.).
         SearchContext context = findDialog.getSearchContext();
         replaceDialog.setSearchContext(context);
+        
+        WindowFocusListener wfl = new WindowFocusListener() {
+            @Override
+            public void windowGainedFocus(WindowEvent e) {
+                SwingUtilities.invokeLater(() -> {
+                    userInterface.setMenuBarEnabled(false);
+                });
+            }
 
+            @Override
+            public void windowLostFocus(WindowEvent e) {
+                SwingUtilities.invokeLater(() -> {
+                    userInterface.setMenuBarEnabled(true);
+                });
+            }
+        };
+        findDialog.addWindowFocusListener(wfl);
+        replaceDialog.addWindowFocusListener(wfl);
         findDialog.setVisible(false);
         replaceDialog.setVisible(false);
     }

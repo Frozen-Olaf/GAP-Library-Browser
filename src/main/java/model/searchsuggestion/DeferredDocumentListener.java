@@ -10,6 +10,8 @@ public class DeferredDocumentListener implements DocumentListener {
 
     public static final int FASTER_RESPONSE_TIME = 250;
     public static final int SLOWER_RESPONSE_TIME = 750;
+    public static final int RESPONSE_TIM_LOWER_LIMIT = FASTER_RESPONSE_TIME;
+    public static final int RESPONSE_TIME_UPPER_LIMIT = 1500;
 
     private final Timer timer;
     private boolean isRemovingText;

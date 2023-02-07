@@ -26,6 +26,8 @@ import org.fife.rsta.ui.search.SearchEvent;
 import org.fife.rsta.ui.search.SearchListener;
 import org.fife.ui.rtextarea.SearchContext;
 
+import delegate.button.ButtonDecorator;
+
 public class CustomReplaceDialog extends AbstractFindReplaceDialog {
 
     private JButton replaceButton;
@@ -303,6 +305,10 @@ public class CustomReplaceDialog extends AbstractFindReplaceDialog {
         replaceAllButton.setEnabled(false);
         replaceAllButton.setIcon(null);
         replaceAllButton.setToolTipText(null);
+        ButtonDecorator.addDefaultMouseListenerWithBorderAlwaysDrawn(findNextButton);
+        ButtonDecorator.addDefaultMouseListenerWithBorderAlwaysDrawn(replaceButton);
+        ButtonDecorator.addDefaultMouseListenerWithBorderAlwaysDrawn(replaceAllButton);
+        ButtonDecorator.addDefaultMouseListenerWithBorderAlwaysDrawn(cancelButton);
         buttonPanel.add(findNextButton);
         buttonPanel.add(replaceButton);
         buttonPanel.add(replaceAllButton);

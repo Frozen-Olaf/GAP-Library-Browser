@@ -36,9 +36,9 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableRowSorter;
 
+import delegate.CornerRoundedTextPane;
 import delegate.UserInterface;
 import delegate.button.ButtonDecorator;
-import delegate.searchbar.CornerRoundedTextPane;
 import delegate.table.CustomTable;
 import delegate.table.CustomTableModel;
 import model.Model;

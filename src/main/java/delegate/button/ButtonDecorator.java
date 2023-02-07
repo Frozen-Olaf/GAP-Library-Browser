@@ -23,4 +23,18 @@ public abstract class ButtonDecorator {
             }
         });
     }
+    
+    public static void addDefaultMouseListenerWithBorderAlwaysDrawn(JButton button) {
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setCursor(Cursor.getDefaultCursor());
+            }
+        });
+    }
 }

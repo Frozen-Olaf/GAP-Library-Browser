@@ -24,6 +24,8 @@ import org.fife.rsta.ui.search.SearchEvent;
 import org.fife.rsta.ui.search.SearchListener;
 import org.fife.ui.rtextarea.SearchContext;
 
+import delegate.button.ButtonDecorator;
+
 public class CustomFindDialog extends AbstractFindReplaceDialog {
 
     /**
@@ -106,6 +108,8 @@ public class CustomFindDialog extends AbstractFindReplaceDialog {
         // Make a panel containing the action buttons.
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new GridLayout(2, 1, 5, 5));
+        ButtonDecorator.addDefaultMouseListenerWithBorderAlwaysDrawn(findNextButton);
+        ButtonDecorator.addDefaultMouseListenerWithBorderAlwaysDrawn(cancelButton);
         buttonPanel.add(findNextButton);
         buttonPanel.add(cancelButton);
         JPanel rightPanel = new JPanel();

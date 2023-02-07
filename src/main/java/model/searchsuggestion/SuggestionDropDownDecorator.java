@@ -41,6 +41,7 @@ public class SuggestionDropDownDecorator<C extends JComponent> implements Proper
 
     private boolean disableTextEvent;
 
+    private static int searchSuggestionResponseTime = DeferredDocumentListener.FASTER_RESPONSE_TIME;
     private final DeferredDocumentListener ddl = new DeferredDocumentListener(
             DeferredDocumentListener.FASTER_RESPONSE_TIME, new ActionListener() {
                 @Override
@@ -64,6 +65,14 @@ public class SuggestionDropDownDecorator<C extends JComponent> implements Proper
         SuggestionDropDownDecorator<C> d = new SuggestionDropDownDecorator<>(userInterface, component,
                 isInMethodArgumentInputMode, suggestionClient);
         d.init();
+    }
+
+    public static int getSearchSuggestionResponseTime() {
+        return searchSuggestionResponseTime;
+    }
+
+    public static void setSearchSuggestionResponseTime(int newResponseTime) {
+        searchSuggestionResponseTime = newResponseTime;
     }
 
     private void init() {
@@ -249,7 +258,8 @@ public class SuggestionDropDownDecorator<C extends JComponent> implements Proper
         } else if (propertyName == "response") {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    ddl.updateDelayTime((int) evt.getNewValue());
+                    int newResponseTime = (int) evt.getNewValue();
+                    ddl.updateDelayTime(newResponseTime);
                 }
             });
         }
