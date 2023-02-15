@@ -1,9 +1,6 @@
 # GAP-Library-Browser
-## version: v1.0.1
-* Allows user to save an edited file to a new file.
-* Allows user to start writing on a new empty file.
-* Allows user to search/replace words within a code file.
-* Allows user to choose/configure search suggestion response time.
+## version: v1.0.2
+* Dumped content will now be saved to the current working directory of the GAP session where the dumping is called.
 ------------------------------------------------------------------------------------------------------------------------------
 ### This project is a tool to browse the libraries and packages of the GAP system.
 ### It consists of two parts: 
@@ -27,19 +24,16 @@ This part of the project is implemented by a script `dump.g` that dumps all the 
   * file path to the source code file in which the method is implemented;
   * line number range in the source code file that includes the implementation of the method.
 
-To run the dumping, a running GAP session with ***package io*** and ***package json*** loaded is required.
+To run the dumping, the ***package io*** and ***package json*** are required.
 If your GAP hasn't the two packages yet, they can be downloaded here:
   * for pkg io: https://gap-packages.github.io/io/
   * for pkg json: https://gap-packages.github.io/json/
-  
-To load a pkg into a running GAP session, one can use the command:
-> LoadPackage("pkg_name");
 
 After you make sure the two required packages are loaded onto your GAP session,
 to run the dumping, use the command: 
 > Read("/file/path/to/dump.g");
 
-If nothing goes wrong :), then a JSON file under the name format `dump-<current_datetime>.json` will be created under a directory `dump` in the root diectory of the running GAP session, and it contains all the dumped information!
+If nothing goes wrong :), then a JSON file under the name format `dump-<current_datetime>.json` will be created under the current working directory of the running GAP session, which contains all the dumped information.
 
 #### Note:
 Dumping so far has only been tested on GAP 4.12.0 & 4.12.1.
