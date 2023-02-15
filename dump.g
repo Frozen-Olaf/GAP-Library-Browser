@@ -1,3 +1,6 @@
+LoadPackage("io");
+LoadPackage("json");
+
 FiltersOfAllArguments := function(methods, i, t)
     local j, k, f, res, temp, flags, fvalues;
     res := [];
@@ -73,10 +76,11 @@ datetime := JoinStringsWithSeparator(datetime_list,"-");
 datetime := ReplacedString(datetime,":","-");
 
 fname := Concatenation("dump-", Concatenation(datetime, ".json"));
-fpath := Filename(DirectoriesLibrary("")[1], Concatenation("dump/", fname));
+# fpath := Filename(DirectoriesLibrary("")[1], Concatenation("dump/", fname));
+fpath := Filename(Directory(IO_getcwd()), fname);
 
 f := IO_File(fpath,"w");
-IO_Write(f, "GAP root directory: ",  GAPInfo.RootPaths[3]);
+IO_Write(f, "GAP root directory: ",  Last(GAPInfo.RootPaths));
 IO_Write(f, "\n");
 IO_Write(f, GapToJsonString(opt_rec_list[1]));
 for elem in opt_rec_list{[2..Length(opt_rec_list)]} do
