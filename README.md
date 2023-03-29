@@ -1,6 +1,6 @@
 # GAP-Library-Browser
-## version: v1.0.2
-* Dumped content will now be saved to the current working directory of the GAP session where the dumping is called.
+## version: v1.0.3
+* This version is the final version of the project.
 ------------------------------------------------------------------------------------------------------------------------------
 ### This project is a tool to browse the libraries and packages of the GAP system.
 ### It consists of two parts: 
