@@ -41,15 +41,15 @@ import delegate.button.ButtonDecorator;
 import delegate.page.HomePage;
 import delegate.page.Page;
 import delegate.page.SearchResultPage;
+import delegate.searchsuggestion.SuggestionClient;
+import delegate.searchsuggestion.SuggestionDropDownDecorator;
+import delegate.searchsuggestion.SuggestionEntry;
+import delegate.searchsuggestion.TextComponentWordSuggestionClient;
 import model.Model;
 import model.data.Method;
 import model.data.ModelData;
 import model.icon.IconVault;
-import model.search.SearchClient;
-import model.searchsuggestion.SuggestionClient;
-import model.searchsuggestion.SuggestionDropDownDecorator;
-import model.searchsuggestion.SuggestionEntry;
-import model.searchsuggestion.TextComponentWordSuggestionClient;
+import model.search.SearchModule;
 
 public class SearchBar extends JPanel implements PropertyChangeListener {
 
@@ -58,7 +58,7 @@ public class SearchBar extends JPanel implements PropertyChangeListener {
     private final Page page;
     private final Model model;
     private final ModelData modelData;
-    private final SearchClient searchClient;
+    private final SearchModule searchModule;
     private final SuggestionClient<JTextComponent> suggestionClient;
 
     private JButton searchInputBtn;
@@ -82,7 +82,7 @@ public class SearchBar extends JPanel implements PropertyChangeListener {
         frame = userInterface.getFrame();
         this.model = model;
         modelData = model.getModelData();
-        searchClient = model.getSearchClient();
+        searchModule = model.getSearchModule();
         suggestionClient = new TextComponentWordSuggestionClient(model, this::newSearchSuggestion);
 
         this.page = page;
@@ -100,25 +100,25 @@ public class SearchBar extends JPanel implements PropertyChangeListener {
 
     private void setSearchState() {
         if (cbMethod.isSelected()) {
-            model.setSearchState(SearchClient.STATE_SEARCH_METHOD);
+            model.setSearchState(SearchModule.STATE_SEARCH_METHOD);
         } else if (cbOpt.isSelected()) {
-            model.setSearchState(SearchClient.STATE_SEARCH_OPERATION);
+            model.setSearchState(SearchModule.STATE_SEARCH_OPERATION);
         } else if (cbFilter.isSelected()) {
-            model.setSearchState(SearchClient.STATE_SEARCH_FILTER);
+            model.setSearchState(SearchModule.STATE_SEARCH_FILTER);
         } else
-            model.setSearchState(SearchClient.STATE_IDLE);
+            model.setSearchState(SearchModule.STATE_IDLE);
     }
 
     private List<SuggestionEntry> newSearchSuggestion(String input, Boolean isInMethodArgumentInputMode,
             Boolean hasSearchStateChanged, List<SuggestionEntry> previousResult) {
         if (previousResult.isEmpty() || hasSearchStateChanged) {
-            int searchState = isInMethodArgumentInputMode ? SearchClient.STATE_SEARCH_FILTER : model.getSearchState();
+            int searchState = isInMethodArgumentInputMode ? SearchModule.STATE_SEARCH_FILTER : model.getSearchState();
 
             Set<SuggestionEntry> orderedSuggestions = new LinkedHashSet<SuggestionEntry>();
             // don't display search histories when user is typing in a method argument input
             // bar.
             if (!isInMethodArgumentInputMode) {
-                List<String> searchHistories = searchClient.getNonDuplicateSearchHisotryInList(searchState);
+                List<String> searchHistories = searchModule.getNonDuplicateSearchHistoryInList(searchState);
                 ListIterator<String> iterator = searchHistories.listIterator(searchHistories.size());
                 int searchHistoryDisplayNumLimit = 5;
                 while (iterator.hasPrevious() && orderedSuggestions.size() < searchHistoryDisplayNumLimit) {
@@ -128,21 +128,21 @@ public class SearchBar extends JPanel implements PropertyChangeListener {
                 }
             }
 
-            if (searchState == SearchClient.STATE_SEARCH_OPERATION) {
+            if (searchState == SearchModule.STATE_SEARCH_OPERATION) {
                 List<String> optns = modelData.getAllOperationsSortedInList();
                 if (optns != null) {
                     List<SuggestionEntry> filtered = optns.stream().filter(o -> o.startsWith(input))
                             .map(e -> new SuggestionEntry(false, e)).collect(Collectors.toList());
                     orderedSuggestions.addAll(filtered);
                 }
-            } else if (searchState == SearchClient.STATE_SEARCH_FILTER) {
+            } else if (searchState == SearchModule.STATE_SEARCH_FILTER) {
                 List<String> filters = modelData.getAllFiltersSortedInList();
                 if (filters != null) {
                     List<SuggestionEntry> filtered = filters.stream().filter(f -> f.startsWith(input))
                             .map(e -> new SuggestionEntry(false, e)).collect(Collectors.toList());
                     orderedSuggestions.addAll(filtered);
                 }
-            } else if (searchState == SearchClient.STATE_SEARCH_METHOD) {
+            } else if (searchState == SearchModule.STATE_SEARCH_METHOD) {
                 List<Method> methods = modelData.getAllMethodsSortedInList();
                 if (methods != null) {
                     List<SuggestionEntry> filtered = methods.stream().map(Method::getName)
@@ -274,35 +274,39 @@ public class SearchBar extends JPanel implements PropertyChangeListener {
         String toSearch = searchInput.getText().trim();
 
         boolean isInMethodSearchArgInputMode = (methodSearchInputPane != null && !methodSearchInputPane.isEmpty());
-        if (searchState == SearchClient.STATE_SEARCH_METHOD && isInMethodSearchArgInputMode) {
+        if (searchState == SearchModule.STATE_SEARCH_METHOD && isInMethodSearchArgInputMode) {
             toSearch += methodSearchInputPane.getAllArgumentsInStandardInputFormat();
         }
 
+        if (UserInterface.getMultiPage().changeToPage(toSearch, true)) {
+            searchModule.addSearchHistory(searchState, toSearch);
+            return;
+        }
         String history;
-        if ((history = searchClient.hasEquivalentSearchHistory(searchState, toSearch)) != null) {
+        if ((history = searchModule.hasEquivalentSearchHistory(searchState, toSearch)) != null) {
             if (UserInterface.getMultiPage().changeToPage(history, true))
                 return;
         }
 
-        if (searchState == SearchClient.STATE_IDLE) {
+        if (searchState == SearchModule.STATE_IDLE) {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     JOptionPane.showMessageDialog(frame,
-                            "Please tick one checkbox to\n" + "speficy your intended searching type.");
+                            "Please tick one checkbox to indicate your intended category for searching.");
                 }
             });
         } else {
             SearchResultPage p = null;
             List<Method> res = null;
-            if (searchState == SearchClient.STATE_SEARCH_OPERATION) {
-                if ((res = searchClient.searchOpt(toSearch)) != null)
-                    p = new SearchResultPage(userInterface, model, toSearch, res, SearchClient.STATE_SEARCH_OPERATION);
-            } else if (searchState == SearchClient.STATE_SEARCH_FILTER) {
-                if ((res = searchClient.searchFilter(toSearch)) != null)
-                    p = new SearchResultPage(userInterface, model, toSearch, res, SearchClient.STATE_SEARCH_FILTER);
-            } else if (searchState == SearchClient.STATE_SEARCH_METHOD) {
-                if ((res = searchClient.searchMethodByNameAndFilters(toSearch)) != null)
-                    p = new SearchResultPage(userInterface, model, toSearch, res, SearchClient.STATE_SEARCH_METHOD);
+            if (searchState == SearchModule.STATE_SEARCH_OPERATION) {
+                if ((res = searchModule.searchOpt(toSearch)) != null)
+                    p = new SearchResultPage(userInterface, model, toSearch, res, SearchModule.STATE_SEARCH_OPERATION);
+            } else if (searchState == SearchModule.STATE_SEARCH_FILTER) {
+                if ((res = searchModule.searchFilter(toSearch)) != null)
+                    p = new SearchResultPage(userInterface, model, toSearch, res, SearchModule.STATE_SEARCH_FILTER);
+            } else if (searchState == SearchModule.STATE_SEARCH_METHOD) {
+                if ((res = searchModule.searchMethod(toSearch)) != null)
+                    p = new SearchResultPage(userInterface, model, toSearch, res, SearchModule.STATE_SEARCH_METHOD);
             } else
                 return;
 
@@ -311,7 +315,7 @@ public class SearchBar extends JPanel implements PropertyChangeListener {
                 UserInterface.getMultiPage().changeToPage(p, true);
                 page.setNext(p);
                 p.setPrev(page);
-                searchClient.addSearchHistory(searchState, toSearch);
+                searchModule.addSearchHistory(searchState, toSearch);
             }
         }
     }
@@ -338,25 +342,25 @@ public class SearchBar extends JPanel implements PropertyChangeListener {
                 if (e.getSource().equals(cbOpt) && cbOpt.isSelected()) {
                     cbFilter.setSelected(false);
                     cbMethod.setSelected(false);
-                    model.setSearchState(SearchClient.STATE_SEARCH_OPERATION);
+                    model.setSearchState(SearchModule.STATE_SEARCH_OPERATION);
                     updateGuiDisplay(false);
                 } else if (e.getSource().equals(cbFilter) && cbFilter.isSelected()) {
                     cbOpt.setSelected(false);
                     cbMethod.setSelected(false);
-                    model.setSearchState(SearchClient.STATE_SEARCH_FILTER);
+                    model.setSearchState(SearchModule.STATE_SEARCH_FILTER);
                     updateGuiDisplay(false);
                 } else if (e.getSource().equals(cbMethod)) {
                     if (cbMethod.isSelected()) {
                         cbOpt.setSelected(false);
                         cbFilter.setSelected(false);
-                        model.setSearchState(SearchClient.STATE_SEARCH_METHOD);
+                        model.setSearchState(SearchModule.STATE_SEARCH_METHOD);
                         updateGuiDisplay(true);
                     } else {
-                        model.setSearchState(SearchClient.STATE_IDLE);
+                        model.setSearchState(SearchModule.STATE_IDLE);
                         updateGuiDisplay(false);
                     }
                 } else {
-                    model.setSearchState(SearchClient.STATE_IDLE);
+                    model.setSearchState(SearchModule.STATE_IDLE);
                 }
             }
         };

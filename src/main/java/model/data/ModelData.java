@@ -26,7 +26,6 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.SetMultimap;
 
 public class ModelData {
-
     private static String GAP_ROOT_DIRECTORY;
 
     public static final Set<String> emptyFilterSet = ImmutableSet.of();
@@ -102,9 +101,37 @@ public class ModelData {
         bw.close();
         notifier.firePropertyChange("save", null, pathToFile);
     }
+    
+    public boolean isEmptyWithoutConsiderSearchHistories() {
+        return optnToMethodMap.isEmpty() && filterToMethodMap.isEmpty();
+    }
+    
+    public boolean isEmpty() {
+        return optnToMethodMap.isEmpty() && filterToMethodMap.isEmpty() && searchHistoyMap.isEmpty();
+    }
+    
+    public boolean hasSearchHistories() {
+        return !searchHistoyMap.isEmpty();
+    }
+    
+    public void clearSearchHistories() {
+        searchHistoyMap.clear();
+    }
+    
+    public void clearAllData() {
+        GAP_ROOT_DIRECTORY = null;
+        optnToMethodMap.clear();
+        filterToMethodMap.clear();
+        filterSet.clear();
+        optnTypeMap.clear();
+        searchHistoyMap.clear();
+        sortedOperationList = null;
+        sortedMethodList = null;
+        sortedFilterList = null;
+    }
 
     /**
-     * The argument file must start with the GAP root directory as its first line,
+     * The dump file to read must start with the GAP root directory as its first line,
      * and the dumped content (dense) follows. No other file format than JSON is
      * permitted.
      * 
@@ -112,15 +139,16 @@ public class ModelData {
      * @return
      * @throws IOException
      */
-    public void readFromJson(File file) throws IOException {
+    public void readFromDumpFile(File file) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line = br.readLine();
         try {
-            String rootDirPath = line.split(": ")[1].trim();
+            JSONObject rootDirInfo = new JSONObject(line);
+            String rootDirPath = rootDirInfo.getString("GAP root directory");
             File rootDir = new File(rootDirPath);
             if (!rootDir.exists() || !rootDir.isDirectory()) {
                 br.close();
-                notifier.firePropertyChange("rtdir", null, file.getCanonicalPath());
+                notifier.firePropertyChange("rtdir", null, rootDirPath);
                 return;
             }
             if (GAP_ROOT_DIRECTORY != null && !GAP_ROOT_DIRECTORY.equals(rootDirPath)) {
@@ -132,7 +160,7 @@ public class ModelData {
             }
 
             while ((line = br.readLine()) != null) {
-                readLineFromJson(line);
+                readLineFromDumpFile(line);
             }
             br.close();
             notifier.firePropertyChange("success", null, file.getCanonicalPath());
@@ -147,14 +175,13 @@ public class ModelData {
                     "Illegal content format in the dump file loaded from:\n" + file.getCanonicalPath());
             return;
         }
-
     }
 
-    private void readLineFromJson(String line) throws JSONException, NumberFormatException {
+    private void readLineFromDumpFile(String line) throws JSONException, NumberFormatException {
         JSONObject obj = new JSONObject(line);
         String optName;
         Set<String> fields = obj.keySet();
-        String type = "Else";
+        String type;
         if (fields.contains("opt_name")) {
             optName = obj.getString("opt_name");
             type = "Operation";
@@ -176,6 +203,7 @@ public class ModelData {
         if (methods.length() == 0) {
             optnToMethodMap.put(optName.trim(), emptyMethod);
             filterToMethodMap.put(emptyFilterSet, emptyMethod);
+            return;
         }
 
         for (int i = 0; i < methods.length(); i++) {
@@ -194,11 +222,8 @@ public class ModelData {
 
             // Using type Object here to handle unexpected fraction number for rank
             Object rank = property.get("rank");
-
             JSONObject src = (JSONObject) method.get("src");
-            String filePath = src.getString("file_path").trim();
-            filePath = filePath.replaceFirst(rootDirPattern, "./");
-
+            String filePath = src.getString("file_path").replaceFirst(rootDirPattern, "./").trim();
             int lineNumStart = src.getInt("line_num_start");
             int lineNumEnd = src.getInt("line_num_end");
 
@@ -207,6 +232,14 @@ public class ModelData {
             optnToMethodMap.put(optName.trim(), mthd);
             filterToMethodMap.put(Method.getUniqueFilters(argFilters), mthd);
         }
+    }
+    
+    public String[] JSONArrayToStringArray(JSONArray jarr) {
+        String[] res = new String[jarr.length()];
+        for (int i = 0; i < res.length; i++) {
+            res[i] = jarr.get(i).toString();
+        }
+        return res;
     }
 
     /**
@@ -217,21 +250,13 @@ public class ModelData {
      * @return
      * @throws NumberFormatException
      */
-    public static int parseFractionToInteger(String str) throws NumberFormatException {
+    public int parseFractionToInteger(String str) throws NumberFormatException {
         if (StringUtils.countMatches(str, '/') == 1) {
             String[] nums = str.split("/");
             float res = Float.valueOf(nums[0]) / Float.valueOf(nums[1]);
             return Math.round(res);
         } else
             return Integer.valueOf(str);
-    }
-
-    public static String[] JSONArrayToStringArray(JSONArray jarr) {
-        String[] res = new String[jarr.length()];
-        for (int i = 0; i < res.length; i++) {
-            res[i] = jarr.get(i).toString();
-        }
-        return res;
     }
 
 }

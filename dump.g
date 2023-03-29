@@ -76,27 +76,31 @@ datetime := JoinStringsWithSeparator(datetime_list,"-");
 datetime := ReplacedString(datetime,":","-");
 
 fname := Concatenation("dump-", Concatenation(datetime, ".json"));
-# fpath := Filename(DirectoriesLibrary("")[1], Concatenation("dump/", fname));
 fpath := Filename(Directory(IO_getcwd()), fname);
+root_dir_info := Concatenation("{\"GAP root directory\" : \"", Concatenation(Last(GAPInfo.RootPaths), "\"},"));
+line_count := 0;
 
 f := IO_File(fpath,"w");
-IO_Write(f, "GAP root directory: ",  Last(GAPInfo.RootPaths));
-IO_Write(f, "\n");
-IO_Write(f, GapToJsonString(opt_rec_list[1]));
-for elem in opt_rec_list{[2..Length(opt_rec_list)]} do
-    IO_Write(f, ",\n");
-    IO_Write(f, GapToJsonString(elem));
-od;
-IO_Write(f, "\n");
+if IO_WriteLine(f, root_dir_info) = fail then
+    Print(LastSystemError().message);
+else
+    line_count := line_count + 1;
+    for elem in opt_rec_list do
+        if IO_WriteLine(f, GapToJsonString(elem)) = fail then
+            Print(LastSystemError().message);
+            break;
+        else
+            line_count := line_count + 1;
+        fi;
+    od;
+fi;
 IO_Flush(f);
 IO_Close(f);
 
-
-# Test Module
-if IsExistingFile("test.g") then
-    if IsReadableFile("test.g") then
-        Read("test.g");
-    else
-        Print(LastSystemError().message);
-    fi;
+if line_count <> Length(opt_rec_list) + 1 then
+    Print(Concatenation("Warning: Truncated Dump to ", fpath));
+    Print("\n");
+else
+    Print(Concatenation("Success: Dump to ", fpath));
+    Print("\n");
 fi;

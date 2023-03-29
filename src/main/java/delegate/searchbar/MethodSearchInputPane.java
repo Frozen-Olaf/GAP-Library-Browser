@@ -24,8 +24,8 @@ import delegate.CornerRoundedTextPane;
 import delegate.UserInterface;
 import delegate.button.ButtonDecorator;
 import model.icon.IconVault;
-import model.searchsuggestion.SuggestionClient;
-import model.searchsuggestion.SuggestionDropDownDecorator;
+import delegate.searchsuggestion.SuggestionClient;
+import delegate.searchsuggestion.SuggestionDropDownDecorator;
 
 public class MethodSearchInputPane extends JPanel {
 

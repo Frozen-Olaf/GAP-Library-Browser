@@ -70,9 +70,9 @@ public class MultiPage extends JPanel implements PropertyChangeListener {
         tabs.validate();
     }
 
-    public boolean changeToPage(String pageName, boolean isCalledFromASearch) {
+    public boolean changeToPage(String pageName, boolean isCalledFromSearch) {
         int index = tabs.indexOfTab(pageName);
-        if (isCalledFromASearch && tabs.getSelectedIndex() == index) {
+        if (isCalledFromSearch && tabs.getSelectedIndex() == index) {
             JOptionPane.showMessageDialog(frame, "You are already in your destination.");
         }
         boolean found = (index != -1);
@@ -82,9 +82,9 @@ public class MultiPage extends JPanel implements PropertyChangeListener {
         return found;
     }
 
-    public boolean changeToPage(Page page, boolean isCalledFromASearch) {
+    public boolean changeToPage(Page page, boolean isCalledFromSearch) {
         int index = tabs.indexOfComponent(page);
-        if (isCalledFromASearch && tabs.getSelectedIndex() == index) {
+        if (isCalledFromSearch && tabs.getSelectedIndex() == index) {
             JOptionPane.showMessageDialog(frame, "You are already in your destination.");
         }
         boolean res = (index != -1);

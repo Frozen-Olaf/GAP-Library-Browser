@@ -1,3 +1,7 @@
+search/SearchMethodFormat2Test.class
+search/SearchMethodFormat3Test.class
+search/SearchHistoryTest.class
 search/SearchOperationTest.class
-search/SearchFilterTest.class
+search/SearchMethodFormat1Test.class
 search/BaseTest.class
+search/SearchFilterTest.class

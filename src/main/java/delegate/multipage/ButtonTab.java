@@ -48,7 +48,7 @@ public class ButtonTab extends JPanel {
     }
     
     public void updateTabName(String name) {
-        title = name.substring(name.lastIndexOf("/")+1);
+        title = name.substring(name.lastIndexOf("/") + 1);
         setToolTipText(name);
         textLabel.setText(title);
     }

@@ -47,14 +47,14 @@ public class Delegate implements PropertyChangeListener {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     JOptionPane.showMessageDialog(frame,
-                            "GAP root directory not found or illegal:\n" + evt.getNewValue());
+                            "GAP root directory from this dump file not found or illegal:\n" + evt.getNewValue());
                 }
             });
         } else if (propertyName == "newrtdir") {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     JOptionPane.showMessageDialog(frame,
-                            "GAP root directory from this dump file: "+evt.getNewValue()+"\nis different from the previous: " + evt.getOldValue());
+                            "GAP root directory from this dump file: " + evt.getNewValue()+"\nis different from the previous: " + evt.getOldValue());
                 }
             });
         } else if (propertyName == "illflt") {
@@ -75,6 +75,30 @@ public class Delegate implements PropertyChangeListener {
                 public void run() {
                     JOptionPane.showMessageDialog(frame,
                             "Successfully saved to:\n" + evt.getNewValue());
+                }
+            });
+        } else if (propertyName == "valid") {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    JOptionPane.showMessageDialog(frame, evt.getNewValue() + " is valid.");
+                }
+            });
+        } else if (propertyName == "currinvld") {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    JOptionPane.showMessageDialog(frame, "Current loaded data is invalid:\n" + evt.getNewValue());
+                }
+            });
+        } else if (propertyName == "fileinvld") {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    JOptionPane.showMessageDialog(frame, "The dump file is invalid:\n" + evt.getNewValue());
+                }
+            });
+        } else if (propertyName == "empty") {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    JOptionPane.showMessageDialog(frame, "There is no data loaded to the browser.");
                 }
             });
         }

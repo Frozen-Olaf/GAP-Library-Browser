@@ -45,7 +45,7 @@ import model.Model;
 import model.data.Method;
 import model.data.ModelData;
 import model.icon.IconVault;
-import model.search.SearchClient;
+import model.search.SearchModule;
 
 public class SearchResultPage extends Page {
 
@@ -113,15 +113,15 @@ public class SearchResultPage extends Page {
 
         infoPanel = new JPanel(new BorderLayout());
         String words = "Search results for: ";
-        if (type == SearchClient.STATE_SEARCH_OPERATION) {
+        if (type == SearchModule.STATE_SEARCH_OPERATION) {
             String optnType = model.getModelData().getOperationType(name);
             if (optnType != null && !optnType.equals("Else"))
                 words += "<" + optnType + " " + name + ">";
             else
                 words += "<Operation " + name + ">";
-        } else if (type == SearchClient.STATE_SEARCH_FILTER) {
+        } else if (type == SearchModule.STATE_SEARCH_FILTER) {
             words += "<Filter " + name + ">";
-        } else if (type == SearchClient.STATE_SEARCH_METHOD) {
+        } else if (type == SearchModule.STATE_SEARCH_METHOD) {
             words += "<Method " + name + ">";
         }
 

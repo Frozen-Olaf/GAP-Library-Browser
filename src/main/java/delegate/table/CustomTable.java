@@ -174,7 +174,7 @@ public class CustomTable extends JTable {
                         SwingUtilities.invokeLater(new Runnable() {
                             public void run() {
                                 JOptionPane.showMessageDialog(frame,
-                                        "Not supported, cannot open the file or the driectory of it from this browser.");
+                                        "Opening the file or driectory directly from this browser is NOT supported by your OS.");
                             }
                         });
                     } catch (IllegalArgumentException iae) {

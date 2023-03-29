@@ -34,10 +34,10 @@ import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import delegate.multipage.MultiPage;
 import delegate.page.CodePage;
 import delegate.page.HomePage;
+import delegate.searchsuggestion.DeferredDocumentListener;
+import delegate.searchsuggestion.SuggestionDropDownDecorator;
 import model.Model;
 import model.icon.IconVault;
-import model.searchsuggestion.DeferredDocumentListener;
-import model.searchsuggestion.SuggestionDropDownDecorator;
 
 public class UserInterface {
 
@@ -148,9 +148,10 @@ public class UserInterface {
         };
 
         initFileMenu(cl);
-        initDisplayMenu(cl);
+        initDataMenu(cl);
         initPageMenu(cl);
         initConfigureMenu(cl);
+        initDisplayMenu(cl);
 
         frame.setJMenuBar(menu);
     }
@@ -171,14 +172,14 @@ public class UserInterface {
                 // Only allow user to load json file.
                 fileChooser.addChoosableFileFilter(jsonFilter);
                 fileChooser.setAcceptAllFileFilterUsed(false);
-                fileChooser.setDialogTitle("Choose a json file");
+                fileChooser.setDialogTitle("Choose a dump file");
                 fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
                     File file = fileChooser.getSelectedFile();
                     SwingUtilities.invokeLater(new Runnable() {
                         public void run() {
                             try {
-                                model.getModelData().readFromJson(file);
+                                model.getModelData().readFromDumpFile(file);
                             } catch (IOException ioe) {
                                 JOptionPane.showMessageDialog(frame, ioe.getMessage());
                             }
@@ -211,6 +212,7 @@ public class UserInterface {
                         String fileName;
                         String filePath;
                         File file;
+                        // The loop continues until the user enters a valid filename and confirms to save.
                         while (true) {
                             fileName = JOptionPane.showInputDialog(frame,
                                     "Please name this file, including its filename extension:");
@@ -251,44 +253,107 @@ public class UserInterface {
 
         menu.add(file);
     }
+    
+    private void initDataMenu(ChangeListener cl) {
+        JMenu data = new JMenu("Data");
+        data.addChangeListener(cl);
 
-    private void initDisplayMenu(ChangeListener cl) {
-        JMenu display = new JMenu("Display");
-        display.addChangeListener(cl);
-        JMenu theme = new JMenu("Theme");
-        theme.addChangeListener(cl);
-        JMenuItem lightTheme = new JMenuItem("Light Theme");
-        JMenuItem darkTheme = new JMenuItem("Dark Theme");
-        theme.add(lightTheme);
-        theme.add(darkTheme);
-        display.add(theme);
-        lightTheme.addActionListener(new ActionListener() {
+        JMenuItem clearSearchHistory = new JMenuItem("Clear Search History");
+        clearSearchHistory.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
-                        changeLaf(false);
-                    }
-                });
-            }
-        });
-        darkTheme.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        changeLaf(true);
+                        if (!model.getModelData().hasSearchHistories()) {
+                            JOptionPane.showMessageDialog(frame, "There is no search history.");
+                            return;
+                        }
+                        int choice = JOptionPane.showConfirmDialog(frame,
+                                "Are you sure you want to clear all the search histories?");
+                        if (choice == JOptionPane.YES_OPTION) {
+                            model.getModelData().clearSearchHistories();
+                            JOptionPane.showMessageDialog(frame, "Search histories have been cleared.");
+                        }
                     }
                 });
             }
         });
 
+        JMenuItem clearData = new JMenuItem("Clear Loaded Data");
+        clearData.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        if (model.getModelData().isEmpty()) {
+                            JOptionPane.showMessageDialog(frame, "There is currently no data in the browser.");
+                            return;
+                        }
+                        int choice = JOptionPane.showConfirmDialog(frame,
+                                "Are you sure you want to clear all the data in the browser?");
+                        if (choice == JOptionPane.YES_OPTION) {
+                            model.getModelData().clearAllData();
+                            JOptionPane.showMessageDialog(frame, "All the data has been cleared.");
+                        }
+                    }
+                });
+            }
+        });
+        
+        JMenu validate = new JMenu("Validate");
+        validate.addChangeListener(cl);
+
+        JMenuItem validateLoadedData = new JMenuItem("Validate Loaded Data");
+        validateLoadedData.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        model.validateCurrentLoadedData();
+                    }
+                });
+            }
+        });
+
+        FileNameExtensionFilter jsonFilter = new FileNameExtensionFilter("JSON files", "json");
+        JMenuItem validateDumpFile = new JMenuItem("Validate Dump File");
+        validateDumpFile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                fileChooser.resetChoosableFileFilters();
+                // Only allow user to load json file.
+                fileChooser.addChoosableFileFilter(jsonFilter);
+                fileChooser.setAcceptAllFileFilterUsed(false);
+                fileChooser.setDialogTitle("Choose a dump file");
+                fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
+                    File file = fileChooser.getSelectedFile();
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            try {
+                                model.validateDumpFile(file);
+                            } catch (IOException ioe) {
+                                JOptionPane.showMessageDialog(frame, ioe.getMessage());
+                            }
+                        }
+                    });
+                }
+
+            }
+        });
+        
         int ctrl = frame.getToolkit().getMenuShortcutKeyMaskEx();
         int shift = InputEvent.SHIFT_DOWN_MASK;
-        lightTheme.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ctrl | shift));
-        darkTheme.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, ctrl | shift));
+        validateLoadedData.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, shift | ctrl));
+        
+        validate.add(validateLoadedData);
+        validate.add(validateDumpFile);
 
-        menu.add(display);
+        data.add(clearSearchHistory);
+        data.add(clearData);
+        data.add(validate);
+
+        menu.add(data);
     }
 
     private void initPageMenu(ChangeListener cl) {
@@ -363,11 +428,11 @@ public class UserInterface {
             }
         });
 
-        int c = frame.getToolkit().getMenuShortcutKeyMaskEx();
-        newCodePage.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, c));
-        find.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, c));
-        replace.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, c));
-        goToLine.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, c));
+        int ctrl = frame.getToolkit().getMenuShortcutKeyMaskEx();
+        newCodePage.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ctrl));
+        find.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, ctrl));
+        replace.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ctrl));
+        goToLine.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, ctrl));
 
         codePage.add(newCodePage);
         codePage.add(find);
@@ -384,8 +449,8 @@ public class UserInterface {
         JMenu searchSuggest = new JMenu("Search Suggestion Response");
         searchSuggest.addChangeListener(cl);
 
-        JMenuItem faster = new JMenuItem("Faster");
-        JMenuItem slower = new JMenuItem("Slower");
+        JMenuItem faster = new JMenuItem("Faster (default)");
+        JMenuItem slower = new JMenuItem("Slower (default)");
         JMenuItem custom = new JMenuItem("Custom");
 
         dialog = new SearchSuggestionResponseTimeDialog(frame, UIChangeNotifier, "Search Suggestion Response Time Slider");
@@ -437,6 +502,7 @@ public class UserInterface {
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
                         dialog.getSlider().setValue(SuggestionDropDownDecorator.getSearchSuggestionResponseTime());
+                        dialog.getSlider().updateUI();
                         dialog.setLocationRelativeTo(frame);
                         dialog.setVisible(true);
                     }
@@ -456,6 +522,45 @@ public class UserInterface {
 
         config.add(searchSuggest);
         menu.add(config);
+    }
+    
+    private void initDisplayMenu(ChangeListener cl) {
+        JMenu display = new JMenu("Display");
+        display.addChangeListener(cl);
+        JMenu theme = new JMenu("Theme");
+        theme.addChangeListener(cl);
+        JMenuItem lightTheme = new JMenuItem("Light Theme");
+        JMenuItem darkTheme = new JMenuItem("Dark Theme");
+        theme.add(lightTheme);
+        theme.add(darkTheme);
+        display.add(theme);
+        lightTheme.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        changeLaf(false);
+                    }
+                });
+            }
+        });
+        darkTheme.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        changeLaf(true);
+                    }
+                });
+            }
+        });
+
+        int ctrl = frame.getToolkit().getMenuShortcutKeyMaskEx();
+        int shift = InputEvent.SHIFT_DOWN_MASK;
+        lightTheme.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ctrl | shift));
+        darkTheme.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, ctrl | shift));
+
+        menu.add(display);
     }
 
     private void saveToFileFromCodePage(CodePage codePage, String filePath) {

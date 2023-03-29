@@ -20,8 +20,8 @@ import javax.swing.event.ChangeListener;
 import org.fife.rsta.ui.EscapableDialog;
 
 import delegate.button.ButtonDecorator;
-import model.searchsuggestion.DeferredDocumentListener;
-import model.searchsuggestion.SuggestionDropDownDecorator;
+import delegate.searchsuggestion.DeferredDocumentListener;
+import delegate.searchsuggestion.SuggestionDropDownDecorator;
 
 public class SearchSuggestionResponseTimeDialog extends EscapableDialog {
 
@@ -50,11 +50,11 @@ public class SearchSuggestionResponseTimeDialog extends EscapableDialog {
         JLabel infoLabel = new JLabel("Please drag the slide bar to specify the response time");
         infoLabel.setHorizontalAlignment(JLabel.CENTER);
         infoLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
-        JLabel valueLabel = new JLabel("Response Time");
+        JLabel valueLabel = new JLabel("Response Time: " + SuggestionDropDownDecorator.getSearchSuggestionResponseTime());
         valueLabel.setHorizontalAlignment(JLabel.CENTER);
         valueLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
 
-        slider = new JSlider(DeferredDocumentListener.RESPONSE_TIM_LOWER_LIMIT,
+        slider = new JSlider(DeferredDocumentListener.RESPONSE_TIME_LOWER_LIMIT,
                 DeferredDocumentListener.RESPONSE_TIME_UPPER_LIMIT,
                 SuggestionDropDownDecorator.getSearchSuggestionResponseTime());
         slider.setPaintTrack(true);
@@ -64,12 +64,7 @@ public class SearchSuggestionResponseTimeDialog extends EscapableDialog {
         slider.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                int delayTime = slider.getValue();
-                valueLabel.setText("Response Time: " + delayTime);
-                if (!slider.getValueIsAdjusting()) {
-                    UIChangeNotifier.firePropertyChange("response", 0, delayTime);
-                    SuggestionDropDownDecorator.setSearchSuggestionResponseTime(delayTime);
-                }
+                valueLabel.setText("Response Time: " + slider.getValue());
             }
         });
         slider.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
@@ -79,6 +74,11 @@ public class SearchSuggestionResponseTimeDialog extends EscapableDialog {
         ActionListener al = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (e.getSource().equals(okButton)) {
+                    int delayTime = slider.getValue();
+                    UIChangeNotifier.firePropertyChange("response", 0, delayTime);
+                    SuggestionDropDownDecorator.setSearchSuggestionResponseTime(delayTime);
+                }
                 SearchSuggestionResponseTimeDialog.this.setVisible(false);
             }
         };
