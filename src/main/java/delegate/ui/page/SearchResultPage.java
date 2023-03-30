@@ -349,8 +349,6 @@ public class SearchResultPage extends Page {
         add(splitPane, BorderLayout.CENTER);
     }
 
-    private static final long serialVersionUID = 1L;
-
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getSource() != userInterface)
@@ -368,4 +366,6 @@ public class SearchResultPage extends Page {
             });
         }
     }
+
+    private static final long serialVersionUID = 1L;
 }
