@@ -33,7 +33,7 @@ AllMethodsFromOperation := function(opt)
             filters := FiltersOfAllArguments(methods, i, t);
             rank := methods[4+i+t];
             if not IsInt(rank) then
-                rank:=String(rank);
+                rank := String(rank);
             fi;
             property := rec(filters:=filters, rank:=rank);
             name := methods[5+i+t];

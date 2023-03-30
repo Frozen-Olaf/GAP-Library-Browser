@@ -136,7 +136,6 @@ public class ModelData {
      * permitted.
      * 
      * @param file
-     * @return
      * @throws IOException
      */
     public void readFromDumpFile(File file) throws IOException {

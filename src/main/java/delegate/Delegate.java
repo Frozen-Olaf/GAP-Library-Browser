@@ -7,6 +7,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
+import delegate.ui.UserInterface;
 import model.Model;
 
 public class Delegate implements PropertyChangeListener {
