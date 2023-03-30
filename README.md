@@ -8,8 +8,8 @@
     2. The Browser Software with GUI (written in Java)
 
 ### The following page has more information on what the browser can do:
-* [Features](https://github.com/Frozen-Olaf/GAP-Library-Browser/wiki#welcome-to-the-gap-library-browser-wiki)
-* [Search](https://github.com/Frozen-Olaf/GAP-Library-Browser/wiki#welcome-to-the-gap-library-browser-wiki)
+* [Features](https://github.com/Frozen-Olaf/GAP-Library-Browser/wiki/Features)
+* [Search](https://github.com/Frozen-Olaf/GAP-Library-Browser/wiki/Search)
 
 ### Note:
 The browser runs OK on linux or unix-based OS, however, on Windows, some functionality such as the display of a source code file path is compromised.
@@ -17,7 +17,7 @@ The browser runs OK on linux or unix-based OS, however, on Windows, some functio
 ------------------------------------------------------------------------------------
 # Dumping of GAP:
 
-This part of the project is implemented by a script `dump.g` that dumps all the methods under all the operations currently availlable in GAP into a JSON file, covering information such as:
+This part of the project is implemented by the GAP script `dump.g`, which dumps out information about all the operations and methods under them availlable in the GAP session where dumping is executed, into a JSON file, covering information such as:
   * name of the method;
   * filters to which arguments of the method are applicable;
   * rank of the method;
@@ -29,7 +29,7 @@ If your GAP hasn't the two packages yet, they can be downloaded here:
   * for pkg io: https://gap-packages.github.io/io/
   * for pkg json: https://gap-packages.github.io/json/
 
-After you make sure the two required packages are loaded onto your GAP session,
+After you confirm the two required packages are installed in your GAP system,
 to run the dumping, use the command: 
 > Read("/file/path/to/dump.g");
 
@@ -48,7 +48,7 @@ It can read the dumped JSON file, and allow user to perform searches within, and
 To compile and run the browser, simply in command line:
   1. cd to the directory of this project
   2. run the following command (specify the optional argument `dark` if you would like to start the browser in dark mode):
-> java -jar target/GAP_Library_Browser_v1.0.0.jar [dark]
+> java -jar target/GAP_Library_Browser_v1.0.3.jar [dark]
         
 ### Note:
 This project CANNOT run with Java JDK < 8 (noninclusive), and it has not been tested on JDK < 11 yet.
@@ -56,7 +56,7 @@ This project CANNOT run with Java JDK < 8 (noninclusive), and it has not been te
 
 # Hope you have fun with this browser! :)
 
-## This project acknowledges the following icons:
+## This project acknowledges the use of following icons:
 * <a href="https://www.flaticon.com/free-icons/home-button" title="home button icons">Home button icons created by bqlqn - Flaticon</a>
 * <a href="https://www.flaticon.com/free-icons/back" title="back icons">Back icons created by Handicon - Flaticon</a>
 * <a href="https://www.flaticon.com/free-icons/arrow" title="arrow icons">Arrow icons created by Handicon - Flaticon</a>
