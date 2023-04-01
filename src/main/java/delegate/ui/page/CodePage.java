@@ -43,6 +43,8 @@ import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 import org.fife.ui.rtextarea.SearchResult;
 
+import delegate.ui.CustomFindDialog;
+import delegate.ui.CustomGoToDialog;
 import delegate.ui.UserInterface;
 import model.Model;
 

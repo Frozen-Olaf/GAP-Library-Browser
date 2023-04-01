@@ -1,6 +1,7 @@
 LoadPackage("io");
 LoadPackage("json");
 
+# This function returns a list of lists of argument filters of a method.
 FiltersOfAllArguments := function(methods, i, t)
     local j, k, f, res, temp, flags, fvalues;
     res := [];
@@ -14,24 +15,28 @@ FiltersOfAllArguments := function(methods, i, t)
                 Add(temp, NAME_FUNC(f));
             fi;
         od;
+        # Add the fundamental IsObejct at the end so that
+        # methods that have arugemnts only applying this filter
+        # will not have only an empty list dumped out.
         Add(temp, NAME_FUNC(IsObject));
         Add(res, temp);
     od;
     return res;
 end;
 
+# This function returns a list of records of methods under the operation opt.
 AllMethodsFromOperation := function(opt)
     local i, j, d, t, res, methods, method_num, filters, rank, name, property, src_info, src, mthd_rec;
     res := [];
     for i in [0..5] do
-        methods := METHODS_OPERATION(opt, i+1);
-        d := 7+i;
+        methods := METHODS_OPERATION(opt, i+1); # i+1 -> num of method argument.
+        d := 7+i; # length of a cycle in the output from METHODS_OPERATION
         method_num := Length(methods)/d;
-      
         for j in [0..(method_num-1)] do
-            t := d*j;
+            t := d*j; # offset
             filters := FiltersOfAllArguments(methods, i, t);
             rank := methods[4+i+t];
+            # handle non-integer rank value of a method.
             if not IsInt(rank) then
                 rank := String(rank);
             fi;
@@ -46,8 +51,9 @@ AllMethodsFromOperation := function(opt)
     return res;
 end;
 
-opt_rec_list := [];
 opt_list := OPERATIONS;
+# final output
+opt_rec_list := [];
 
 for opt in opt_list do
     name := NAME_FUNC(opt);

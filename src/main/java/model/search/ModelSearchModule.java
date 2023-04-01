@@ -31,7 +31,7 @@ public class ModelSearchModule implements SearchModule {
         optnToMethodMap = modelData.getOperationToMethodMap();
         filterToMethodMap = modelData.getFilterToMethodMap();
         filterSet = modelData.getAllFiltersInSet();
-        searchHistoyMap = modelData.getSearchHistoyMap();
+        searchHistoyMap = modelData.getSearchHistoryMap();
     }
 
     @Override
@@ -341,7 +341,8 @@ public class ModelSearchModule implements SearchModule {
         if (methodsMatchedFilters == null) {
             return null;
         }
-
+        
+        // check method argument number and name.
         List<Method> methodsMatchedArgNumAndNames = new ArrayList<Method>();
         for (Method mthd : methodsMatchedFilters) {
             if (mthd.getArgNumber() == argNum || (isArgNumSubsetFlag && mthd.getArgNumber() > argNum)) {
@@ -359,6 +360,7 @@ public class ModelSearchModule implements SearchModule {
             }
         }
 
+        // finally check method argument order.
         List<Method> res = new ArrayList<Method>();
         boolean isArgNameAndOrderMatch;
         if (!methodsMatchedArgNumAndNames.isEmpty()) {

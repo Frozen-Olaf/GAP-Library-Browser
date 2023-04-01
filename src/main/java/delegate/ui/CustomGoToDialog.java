@@ -1,4 +1,4 @@
-package delegate.ui.page;
+package delegate.ui;
 
 import java.awt.BorderLayout;
 import java.awt.ComponentOrientation;
@@ -33,7 +33,6 @@ import org.fife.rsta.ui.EscapableDialog;
 import org.fife.rsta.ui.UIUtil;
 
 import delegate.ui.button.ButtonDecorator;
-import delegate.ui.CornerRoundedTextPane;
 
 public class CustomGoToDialog extends EscapableDialog {
 

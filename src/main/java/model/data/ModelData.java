@@ -39,7 +39,7 @@ public class ModelData {
 
     // Handle searches of duplicate input, having support in different categories
     // for searching.
-    private final SetMultimap<Integer, String> searchHistoyMap = LinkedHashMultimap.create();
+    private final SetMultimap<Integer, String> searchHistoryMap = LinkedHashMultimap.create();
 
     private List<String> sortedOperationList;
     private List<Method> sortedMethodList;
@@ -67,8 +67,8 @@ public class ModelData {
         return filterSet;
     }
 
-    public SetMultimap<Integer, String> getSearchHistoyMap() {
-        return searchHistoyMap;
+    public SetMultimap<Integer, String> getSearchHistoryMap() {
+        return searchHistoryMap;
     }
 
     public List<String> getAllOperationsSortedInList() {
@@ -107,15 +107,15 @@ public class ModelData {
     }
     
     public boolean isEmpty() {
-        return optnToMethodMap.isEmpty() && filterToMethodMap.isEmpty() && searchHistoyMap.isEmpty();
+        return optnToMethodMap.isEmpty() && filterToMethodMap.isEmpty() && searchHistoryMap.isEmpty();
     }
     
     public boolean hasSearchHistories() {
-        return !searchHistoyMap.isEmpty();
+        return !searchHistoryMap.isEmpty();
     }
     
     public void clearSearchHistories() {
-        searchHistoyMap.clear();
+        searchHistoryMap.clear();
     }
     
     public void clearAllData() {
@@ -124,7 +124,7 @@ public class ModelData {
         filterToMethodMap.clear();
         filterSet.clear();
         optnTypeMap.clear();
-        searchHistoyMap.clear();
+        searchHistoryMap.clear();
         sortedOperationList = null;
         sortedMethodList = null;
         sortedFilterList = null;

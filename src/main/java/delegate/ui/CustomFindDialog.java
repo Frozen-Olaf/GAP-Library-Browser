@@ -1,4 +1,4 @@
-package delegate.ui.page;
+package delegate.ui;
 
 import java.awt.BorderLayout;
 import java.awt.ComponentOrientation;
