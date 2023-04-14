@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: search.SearchFilterTest
 -------------------------------------------------------------------------------
-Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.53 s - in search.SearchFilterTest
+Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.553 s - in search.SearchFilterTest
