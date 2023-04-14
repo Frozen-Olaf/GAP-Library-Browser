@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: search.SearchMethodFormat3Test
+-------------------------------------------------------------------------------
+Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.333 s - in search.SearchMethodFormat3Test
